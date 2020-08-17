@@ -1,0 +1,30 @@
+
+spring:
+  # 配置直接访问templates下的html
+  resources:    static-locations: classpath:/static,classpath:/templates  
+  mvc:      view:        prefix: /WEB-INF/views/        suffix: .jsp
+  # 上传文件大小设置
+  servlet: 
+      multipart: 
+        max-file-size: 100MB
+        max-request-size: 100MB
+  # 日志
+logging:
+  level:
+    com.gszuoye: debug
+    org.springframework: warn
+  
+  
+server:
+    servlet: 
+      context-path: /
+    port: 8081
+    tomcat:
+      # tomcat的URI编码
+      uri-encoding: UTF-8
+      # tomcat最大线程数，默认为200
+      max-threads: 800
+      # Tomcat启动初始化的线程数，默认值25
+      min-spare-threads: 30
+      
+  
