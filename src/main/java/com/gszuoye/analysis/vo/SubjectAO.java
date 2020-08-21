@@ -6,6 +6,10 @@ package com.gszuoye.analysis.vo;
  */
 public class SubjectAO {
 	/**
+	 * 题型id
+	 */
+	private Integer questionTypeId;
+	/**
 	 * 题型名称
 	 */
 	private String subjectTitle;
@@ -14,6 +18,14 @@ public class SubjectAO {
 	 * 题量
 	 */
 	private int count;
+	
+	public Integer getQuestionTypeId() {
+		return questionTypeId;
+	}
+
+	public void setQuestionTypeId(Integer questionTypeId) {
+		this.questionTypeId = questionTypeId;
+	}
 
 	public String getSubjectTitle() {
 		return subjectTitle;

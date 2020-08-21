@@ -1,5 +1,7 @@
 package com.gszuoye.analysis.vo;
 
+import java.util.List;
+
 /**
  * 内容包装类
  *
@@ -9,6 +11,10 @@ public class AnalysisWordAO {
 	 * 内容，html片段
 	 */
 	private String content; 
+	/**
+	 * 文本内容
+	 */
+	private String text; 
 	/**
 	 * 分块id
 	 */
@@ -25,12 +31,22 @@ public class AnalysisWordAO {
 	 * 是否设置答案
 	 */
 	private boolean isAnser;
+	/**
+	 * 选择项处理
+	 */
+	private List<OptionAO> options;
 	
 	public String getContent() {
 		return content;
 	}
 	public void setContent(String content) {
 		this.content = content;
+	}
+	public String getText() {
+		return text;
+	}
+	public void setText(String text) {
+		this.text = text;
 	}
 	public String getItemId() {
 		return itemId;
@@ -55,6 +71,12 @@ public class AnalysisWordAO {
 	}
 	public void setAnser(boolean isAnser) {
 		this.isAnser = isAnser;
+	}
+	public List<OptionAO> getOptions() {
+		return options;
+	}
+	public void setOptions(List<OptionAO> options) {
+		this.options = options;
 	}
 	
 }
