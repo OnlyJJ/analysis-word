@@ -72,8 +72,7 @@ public class AnalysisUtil {
 	private static final String UNDERLINE = "underline";
 	private static final String U_1 = "<u>";
 	private static final String U_2 = "</u>";
-	private static final String TAB_1 = "<blockquote>";
-	private static final String TAB_2 = "</blockquote>";
+	private static final String TAB = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 	
 	/**
 	 * 约定的起点节点标示
@@ -186,36 +185,21 @@ public class AnalysisUtil {
 			} else {
 				Elements ps = e.select(P);
 				StringBuilder htmlContent = new StringBuilder();
-				boolean preTab = false;
-				boolean suffTab = false;
 				for(Element p : ps) {
 					// 处理空格
 					List<TextNode> texts = p.textNodes();
 					if(!CollectionUtils.isEmpty(texts)) {
 						for(TextNode node : texts) {
 							if(node.text().contains(" ") || node.text().contains("	")) {
-								preTab = true;
+								htmlContent.append(TAB);
 								break;
 							} 
 						}
 					}
 					if(isDocx) {
 						htmlContent.append(convertDocxText(p));
-						if(suffTab) {
-							htmlContent.append(TAB_2);
-							suffTab = false;
-						}
 					} else {
 						htmlContent.append(convertDocText(p, docCssMap));
-						if(suffTab) {
-							htmlContent.append(TAB_2);
-							suffTab = false;
-						}
-					}
-					if(preTab) {
-						htmlContent.append(TAB_1);
-						suffTab = true;
-						preTab = false;
 					}
 				}
 				ao.setContent(htmlContent.toString());
