@@ -154,6 +154,7 @@ public class AnalysisUtil {
 		List<SubjectAO> subjects = new ArrayList<SubjectAO>();
 		Map<String, Integer> subjectMap = new LinkedHashMap<String, Integer>();
 		Map<String, Integer> questionTypeIdMap = new HashMap<String, Integer>();
+		Map<String, Integer> questionNameIdMap = new HashMap<String, Integer>();
 		QuesTypeAO ques = null;
 		String itemId = "";
 		int subjectNum = 0; // 题型下总共的题目数量
@@ -224,6 +225,7 @@ public class AnalysisUtil {
 							if(ques != null) {
 								subjectMap.put(ques.getName(), subjectNum);
 								questionTypeIdMap.put(ques.getName(), ques.getQuestionTypeId());
+								questionNameIdMap.put(ques.getName(), ques.getId());
 							}
 						}
 					}
@@ -245,6 +247,7 @@ public class AnalysisUtil {
 				sub.setSubjectTitle(name);
 				sub.setCount(subjectMap.get(name));
 				sub.setQuestionTypeId(questionTypeIdMap.get(name));
+				sub.setId(questionNameIdMap.get(name));
 				subjects.add(sub);
 			}
 		}

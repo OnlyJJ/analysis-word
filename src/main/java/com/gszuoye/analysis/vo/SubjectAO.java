@@ -19,6 +19,11 @@ public class SubjectAO {
 	 */
 	private int count;
 	
+	/**
+	 * 大题型id
+	 */
+	private Integer id;
+	
 	public Integer getQuestionTypeId() {
 		return questionTypeId;
 	}
@@ -41,6 +46,14 @@ public class SubjectAO {
 
 	public void setCount(int count) {
 		this.count = count;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 	
 	
