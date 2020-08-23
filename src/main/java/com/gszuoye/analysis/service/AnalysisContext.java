@@ -1,5 +1,8 @@
 package com.gszuoye.analysis.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gszuoye.analysis.factory.AnalysisFactory;
 
 /**
@@ -7,6 +10,7 @@ import com.gszuoye.analysis.factory.AnalysisFactory;
  *
  */
 public class AnalysisContext {
+	private static Logger LOG = LoggerFactory.getLogger(AnalysisContext.class);
 	
 	/**
 	 * 获取解析者
@@ -17,7 +21,7 @@ public class AnalysisContext {
 		try {
 			return AnalysisFactory.getInstance().getWordAnalysisAbstract(fileType);
 		} catch (Exception e) {
-//			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
 		}
 		return null;
 	}

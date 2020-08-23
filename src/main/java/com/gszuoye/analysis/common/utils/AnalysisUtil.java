@@ -288,6 +288,7 @@ public class AnalysisUtil {
 			questAO.setName(subjectName);
 			// 随机生成一个数作为questionTypeId
 			questAO.setQuestionTypeId(RandomUtils.nextInt(1, 100));
+			questAO.setId(RandomUtils.nextInt(5000, 9999));
 		}
 		return questAO;
 	}
@@ -319,14 +320,14 @@ public class AnalysisUtil {
 			return styleMap;
 		}
 		// 去掉所有的tab
-		String[] s1 = style.replaceAll("\n", "").replaceAll("\\n", "").replaceAll("\r\n", "").replaceAll("\n\r", "")
+		String[] formtas = style.replaceAll("\n", "").replaceAll("\\n", "").replaceAll("\r\n", "").replaceAll("\n\r", "")
 				.replaceAll("\\r", "").replaceAll("\r", "").split("\\}");
-		for (int i = 0; i < s1.length; i++) {
-			String s2 = s1[i];
-			String[] s3 = s2.split("\\{");
-			if (s3.length > 1) {
-				String key = s3[0].replaceFirst(".", "");
-				String value = s3[1];
+		for (int i = 0; i < formtas.length; i++) {
+			String seg = formtas[i];
+			String[] content = seg.split("\\{");
+			if (content.length > 1) {
+				String key = content[0].replaceFirst(".", "");
+				String value = content[1];
 				styleMap.put(key, value);
 			}
 		}
@@ -342,44 +343,43 @@ public class AnalysisUtil {
 	private static String convertDocText(Element p, Map<String, String> cssMap) {
 		StringBuilder result = new StringBuilder();
 		if(p.tagName().equalsIgnoreCase(IMG)) {
-			result.append(p.toString());
-		} else {
-			String css = p.attr(CLASS);
-			if(StringUtils.isNotEmpty(css)) {
-				StringBuilder per = new StringBuilder();
-				StringBuilder suf = new StringBuilder();
-				if(cssMap.containsKey(css)) {
-					String v = cssMap.get(css);
-					// 加粗
-					if(v.contains(BOLD)) { 
-						per.append(STRONG_1);
-						suf.append(STRONG_2);
-					}
-					// 斜体
-					if(v.contains(ITALIC)) {
-						per.append(EM_1);
-						suf.append(EM_2);
-					}
-					// 上标
-					if(v.contains(SUB)) {
-						per.append(SUB_1);
-						suf.append(SUB_2);
-					}
-					// 下标
-					if(v.contains(SUPER) || v.contains(SUP)) {
-						per.append(SUP_1);
-						suf.append(SUP_2);
-					}
-					// 下滑线
-					if(v.contains(UNDERLINE)) {
-						per.append(U_1);
-						suf.append(U_2);
-					}
-					result.append(per.toString()).append(p.text()).append(suf.toString());
+			return result.append(p.toString()).toString();
+		}
+		String css = p.attr(CLASS);
+		if(StringUtils.isNotEmpty(css)) {
+			StringBuilder per = new StringBuilder();
+			StringBuilder suf = new StringBuilder();
+			if(cssMap.containsKey(css)) {
+				String v = cssMap.get(css);
+				// 加粗
+				if(v.contains(BOLD)) { 
+					per.append(STRONG_1);
+					suf.append(STRONG_2);
 				}
-			} else {
-				result.append(p.text());
+				// 斜体
+				if(v.contains(ITALIC)) {
+					per.append(EM_1);
+					suf.append(EM_2);
+				}
+				// 上标
+				if(v.contains(SUB)) {
+					per.append(SUB_1);
+					suf.append(SUB_2);
+				}
+				// 下标
+				if(v.contains(SUPER) || v.contains(SUP)) {
+					per.append(SUP_1);
+					suf.append(SUP_2);
+				}
+				// 下滑线
+				if(v.contains(UNDERLINE)) {
+					per.append(U_1);
+					suf.append(U_2);
+				}
+				result.append(per.toString()).append(p.text()).append(suf.toString());
 			}
+		} else {
+			result.append(p.text());
 		}
 		return result.toString();
 	}
@@ -392,41 +392,40 @@ public class AnalysisUtil {
 	private static String convertDocxText(Element p) {
 		StringBuilder result = new StringBuilder();
 		if(p.tagName().equalsIgnoreCase(IMG)) { // 图片不处理
-			result.append(p.toString());
-		} else {
-			String css = p.attr(STYLE);
-			if(StringUtils.isNotEmpty(css)) {
-				StringBuilder per = new StringBuilder();
-				StringBuilder suf = new StringBuilder();
-				// 加粗
-				if(css.indexOf(BOLD) != -1) { 
-					per.append(STRONG_1);
-					suf.append(STRONG_2);
-				}
-				// 斜体
-				if(css.indexOf(ITALIC) != -1) {
-					per.append(EM_1);
-					suf.append(EM_2);
-				}
-				// 上标
-				if(css.indexOf(SUB) != -1) {
-					per.append(SUB_1);
-					suf.append(SUB_2);
-				}
-				// 下标
-				if(css.indexOf(SUPER) != -1 || css.indexOf(SUP) != -1) {
-					per.append(SUP_1);
-					suf.append(SUP_2);
-				}
-				// 下滑线
-				if(css.indexOf(UNDERLINE) != -1) {
-					per.append(U_1);
-					suf.append(U_2);
-				}
-				result.append(per.toString()).append(p.text()).append(suf.toString());
-			} else {
-				result.append(p.text());
+			return result.append(p.toString()).toString();
+		}
+		String css = p.attr(STYLE);
+		if(StringUtils.isNotEmpty(css)) {
+			StringBuilder per = new StringBuilder();
+			StringBuilder suf = new StringBuilder();
+			// 加粗
+			if(css.indexOf(BOLD) != -1) { 
+				per.append(STRONG_1);
+				suf.append(STRONG_2);
 			}
+			// 斜体
+			if(css.indexOf(ITALIC) != -1) {
+				per.append(EM_1);
+				suf.append(EM_2);
+			}
+			// 上标
+			if(css.indexOf(SUB) != -1) {
+				per.append(SUB_1);
+				suf.append(SUB_2);
+			}
+			// 下标
+			if(css.indexOf(SUPER) != -1 || css.indexOf(SUP) != -1) {
+				per.append(SUP_1);
+				suf.append(SUP_2);
+			}
+			// 下滑线
+			if(css.indexOf(UNDERLINE) != -1) {
+				per.append(U_1);
+				suf.append(U_2);
+			}
+			result.append(per.toString()).append(p.text()).append(suf.toString());
+		} else {
+			result.append(p.text());
 		}
 		return result.toString();
 	}
@@ -455,7 +454,7 @@ public class AnalysisUtil {
 		StringBuilder tx = null;
 		boolean isOption = false;
 		for (Element el : ps) {
-			if (el.hasText()) {
+			if (el.hasText()) { // 文本
 				String content = el.text();
 				if (content.length() >= 2 && Pattern.matches(OPTION_REG_1, content.substring(0, 2))) {
 					if (option != null) {
@@ -467,15 +466,22 @@ public class AnalysisUtil {
 					tx = new StringBuilder();
 					options.add(option);
 				}
-				if (el.nextElementSibling() != null && el.nextElementSibling().tagName() != null
-						&& IMG.equalsIgnoreCase(el.nextElementSibling().tagName())) {
-					tx.append((el.nextElementSibling().toString()));
-				} else {
-					if (isOption) {
+				if (isOption) {
+					if(content.length() >= 2) {
 						tx.append(content.substring(2));
-						isOption = false;
 					} else {
 						tx.append(content);
+					}
+					isOption = false;
+				} else {
+					if(tx != null) {
+						tx.append(content);
+					}
+				}
+			} else { // 图片
+				if(IMG.equalsIgnoreCase(el.tagName())) {
+					if(tx != null) {
+						tx.append(el.toString());
 					}
 				}
 			}

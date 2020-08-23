@@ -70,13 +70,13 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 						os = new FileOutputStream(file);
 						os.write(content);
 					} catch (Exception e) {
-//						e.printStackTrace();
+						LOG.warn(e.getMessage(),e);
 					} finally {
 						if(os != null) {
 							try {
 								os.close();
 							} catch (IOException e) {
-//								e.printStackTrace();
+								LOG.warn(e.getMessage(),e);
 							}
 						}
 					}
@@ -119,21 +119,21 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 				try {
 					baos.close();
 				} catch (IOException e) {
-//					e.printStackTrace();
+					LOG.warn(e.getMessage(),e);
 				}
 			}
 			if (outStream != null) {
 				try {
 					outStream.close();
 				} catch (IOException e) {
-//					e.printStackTrace();
+					LOG.warn(e.getMessage(),e);
 				}
 			}
 			if(input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-//					e.printStackTrace();
+					LOG.warn(e.getMessage(),e);
 				}
 			}
 		}

@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.fit.pdfdom.PDFDomTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.gszuoye.analysis.exception.BusinessException;
@@ -19,6 +21,8 @@ import com.gszuoye.analysis.vo.result.AnalysisWordResult;
 
 @Service
 public class AnalysisPdfHandler extends AnalysisWordAbstract {
+	
+	private Logger LOG = LoggerFactory.getLogger(AnalysisPdfHandler.class);
 
 	@Override
 	public AnalysisWordResult parse(String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
@@ -36,25 +40,26 @@ public class AnalysisPdfHandler extends AnalysisWordAbstract {
 			tree.writeText(pdf, output);
 			result.setDoc(baos.toString());
 		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 			throw new BusinessException("解析异常");
 		} finally {
 			try {
 				output.close();
 			} catch (IOException e) {
-//				e.printStackTrace();
+				LOG.warn(e.getMessage(),e);
 			}
 			if(baos != null) {
 				try {
 					baos.close();
 				} catch (IOException e) {
-//					e.printStackTrace();
+					LOG.warn(e.getMessage(),e);
 				}
 			}
 			if(outStream != null) {
 				try {
 					outStream.close();
 				} catch (IOException e) {
-//					e.printStackTrace();
+					LOG.warn(e.getMessage(),e);
 				}
 			}
 		}

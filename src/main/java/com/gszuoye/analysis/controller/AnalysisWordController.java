@@ -27,6 +27,7 @@ import com.gszuoye.analysis.vo.result.FileUploadResult;
 @RequestMapping("/analysis/word")
 public class AnalysisWordController {
 	private Logger LOG = LoggerFactory.getLogger(AnalysisWordService.class);
+	
 	@Autowired
 	AnalysisWordService analysisWordService;
 	
@@ -43,10 +44,8 @@ public class AnalysisWordController {
 			res.setFilePath(filePath);
 		} catch(BusinessException e) {
 			LOG.error(e.getMessage(), e);
-			System.err.println(e);
 			return BaseResult.error(e.getMessage());
 		} catch (Exception e) {
-			System.err.println(e);
 			LOG.error(e.getMessage(), e);
 			return BaseResult.error("文件上传失败，请重试");
 		}
@@ -64,6 +63,7 @@ public class AnalysisWordController {
 		try {
 			res = analysisWordService.parseWord(param);
 		} catch(BusinessException e) {
+			LOG.error(e.getMessage(), e);
 			return BaseResult.error(e.getMessage());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
