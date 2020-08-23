@@ -161,24 +161,6 @@ public class AnalysisUtil {
 		boolean isSubTitle = false;
 		for (Element e : contents) {
 			AnalysisWordAO ao = new AnalysisWordAO();
-			// 更换临时图片url到oss地址
-			Elements imgs = e.select(IMG_SRC);
-			if(imgs != null && imgs.size() >0) {
-				for(Element img : imgs) {
-					String src = img.attr(SRC);
-					// docx需要处理上传到oss
-					if(uploadOss) {
-						// TOTO
-						// 默认生成的头部信息不对，这里要替换以下
-						String ossPath = FileUtil.uploadOssBase64(src);
-						img.attr(SRC, ossPath);
-					} else {
-						if(ossMap.containsKey(src)) {
-							img.attr(SRC, ossMap.get(src));
-						}
-					}
-				}
-			}
 			// 处理content
 			// 如果是表格
 			if(e.tagName().equalsIgnoreCase(TABLE)) {

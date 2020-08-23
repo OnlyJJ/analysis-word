@@ -80,9 +80,9 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 							}
 						}
 					}
-					// 上传到oss，单张
-					String ossPath = FileUtil.uploadOssFile(tempPath);
-					ossMap.put(tempPath, ossPath);
+					// 不处理oss
+//					String ossPath = FileUtil.uploadOssFile(tempPath);
+//					ossMap.put(tempPath, ossPath);
 //					imgList.add(tempPath); // 批量上传处理
 					return tempPath;
 				}
