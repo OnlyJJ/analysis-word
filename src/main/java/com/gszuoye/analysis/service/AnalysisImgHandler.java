@@ -3,6 +3,8 @@ package com.gszuoye.analysis.service;
 import java.net.URLEncoder;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -21,6 +23,8 @@ import com.gszuoye.analysis.vo.result.AnalysisWordResult;
  */
 @Service
 public class AnalysisImgHandler extends AnalysisWordAbstract {
+	private Logger LOG = LoggerFactory.getLogger(AnalysisImgHandler.class);
+	
 	/** 
 	 * 百度通用文字识别OCR
 	 */
@@ -53,6 +57,7 @@ public class AnalysisImgHandler extends AnalysisWordAbstract {
             }
 			result.setDoc(content.toString());
 		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
 			throw new BusinessException("该图片格式异常");
 		} 
 		return result;

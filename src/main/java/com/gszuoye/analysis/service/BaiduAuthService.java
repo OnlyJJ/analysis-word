@@ -7,9 +7,20 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fastjson.JSONObject;
 
 public class BaiduAuthService {
+	
+	private static Logger LOG = LoggerFactory.getLogger(BaiduAuthService.class);
+			
+	private static final String AUTH_URL = "https://aip.baidubce.com/oauth/2.0/token?";
+	/** 官网获取的 API Key  */
+	private static final String APP_KEY = "Ug1gfpKGh3KU7KhukeQ0o7NE";
+	/** 官网获取的 Secret Key */
+	private static final String SRCRET_KEY = "zToacIavS1VIx4WnbvqrHEba6BGNVRtG";
 	/**
      * 获取权限token
      * @return 返回示例：
@@ -19,11 +30,7 @@ public class BaiduAuthService {
      * }
      */
     public static String getAuth() {
-        // 官网获取的 API Key 更新为你注册的
-        String clientId = "百度云应用的AK";
-        // 官网获取的 Secret Key 更新为你注册的
-        String clientSecret = "百度云应用的SK";
-        return getAuth(clientId, clientSecret);
+        return getAuth(APP_KEY, SRCRET_KEY);
     }
 
     /**
@@ -36,8 +43,7 @@ public class BaiduAuthService {
      */
     public static String getAuth(String ak, String sk) {
         // 获取token地址
-        String authHost = "https://aip.baidubce.com/oauth/2.0/token?";
-        String getAccessTokenUrl = authHost
+        String getAccessTokenUrl = AUTH_URL
                 // 1. grant_type为固定参数
                 + "grant_type=client_credentials"
                 // 2. 官网获取的 API Key
@@ -54,7 +60,7 @@ public class BaiduAuthService {
             Map<String, List<String>> map = connection.getHeaderFields();
             // 遍历所有的响应头字段
             for (String key : map.keySet()) {
-                System.err.println(key + "--->" + map.get(key));
+                map.get(key);
             }
             // 定义 BufferedReader输入流来读取URL的响应
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -66,13 +72,11 @@ public class BaiduAuthService {
             /**
              * 返回结果示例
              */
-            System.err.println("result:" + result);
             JSONObject jsonObject = JSONObject.parseObject(result);
             String access_token = jsonObject.getString("access_token");
             return access_token;
         } catch (Exception e) {
-            System.err.printf("获取token失败！");
-            e.printStackTrace(System.err);
+        	LOG.error(e.getMessage(), e);
         }
         return null;
     }
