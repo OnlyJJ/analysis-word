@@ -67,7 +67,7 @@ public class AnalysisUtil {
 	private static final String	SUB_2 = "</sub>";
 	private static final String	SUP = "sup";
 	private static final String	SUP_1 = "<sup>";
-	private static final String	SUP_2 = "<sup>";
+	private static final String	SUP_2 = "</sup>";
 	private static final String	SUPER = "super";
 	private static final String UNDERLINE = "underline";
 	private static final String U_1 = "<u>";
