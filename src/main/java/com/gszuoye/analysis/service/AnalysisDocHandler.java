@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
+import com.gszuoye.analysis.common.constants.Constants;
 import com.gszuoye.analysis.common.utils.AnalysisUtil;
 import com.gszuoye.analysis.common.utils.FileUtil;
 import com.gszuoye.analysis.exception.BusinessException;
@@ -84,7 +85,7 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 //					String ossPath = FileUtil.uploadOssFile(tempPath);
 //					ossMap.put(tempPath, ossPath);
 //					imgList.add(tempPath); // 批量上传处理
-					return tempPath;
+					return Constants.DOMAIN + tempPath.replace(Constants.ABSOLUTELY_PATH, "/profile/");
 				}
 			});
 
@@ -139,5 +140,4 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 		}
 		return result;
 	}
-
 }

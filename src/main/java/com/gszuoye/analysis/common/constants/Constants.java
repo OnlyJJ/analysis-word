@@ -35,14 +35,13 @@ public class Constants {
 	public static final String IMG_CONT = "jpg,jpeg,png";
 	public static final String IMG_PNG = "png";
 	/**
-	 * TODO /home/zuoye/,默认会自动添加前缀tessdata，因此，这里不需要加这个目录
-	 * 图片识别语言包的绝对路径
+	 * 域名
 	 */
-	public static final String TEST4J_LANAGE_DATA = "/home/zuoye/";
+	public static final String DOMAIN = "https://jj.gszuoye.com";
 	/**
-	 * 中文语言包
+	 * 绝对路径
 	 */
-	public static final String TEST4J_LANAGE_CHI = "chi_sim";
+	public static final String ABSOLUTELY_PATH = "/home/zuoye/";
 	/**
 	 * 服务端临时图片存储目录
 	 */

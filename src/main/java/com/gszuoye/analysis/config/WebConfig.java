@@ -15,7 +15,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer  {
 
-
     @Bean(name = "multipartResolver")
     public StandardServletMultipartResolver multipartResolver() {
         return new StandardServletMultipartResolver();
@@ -23,6 +22,6 @@ public class WebConfig implements WebMvcConfigurer  {
     
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/home/zuoye/temp/**").addResourceLocations("file:/home/zuoye/temp/");
+        registry.addResourceHandler("/**").addResourceLocations("file:/home/zuoye/");
     }
 }
