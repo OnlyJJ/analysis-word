@@ -12,7 +12,7 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String generaterId() {
-		return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 12) + threadLocalRandom.nextInt(1000);
+		return UUID.randomUUID().toString().replaceAll("-", "").substring(0, 15) + threadLocalRandom.nextInt(1000);
 	}
 	
 	/**

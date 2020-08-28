@@ -62,10 +62,11 @@ public class AnalysisWordService {
 	 * @throws Exception
 	 */
 	public Map<String, QuesTypeAO> getSubjectType(Integer subjectId) throws BusinessException {
-		String subId = String.valueOf(subjectId);
-		if (subMap.containsKey(subId)) {
-			return subMap.get(subId);
-		}
+		// 考虑到性能，这里原本做了下缓存的
+//		String subId = String.valueOf(subjectId);
+//		if (subMap.containsKey(subId)) {
+//			return subMap.get(subId);
+//		}
 		JSONObject param = new JSONObject();
 		param.put(Constants.SUBJECT_ID_KEY, subjectId);
 		JSONObject result = HttpUtil.post(Constants.SUBJECT_TYPE_URL, param.toJSONString());

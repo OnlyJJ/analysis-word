@@ -81,7 +81,11 @@ public class AnalysisUtil {
 	/**
 	 * 小标题正则
 	 */
-	private static String SUB_INDEX_REG = "^([1-9][0-9]*)[.、．(（（]+?";
+	private static String SUB_INDEX_REG = "^([1-9][0-9]*)[.、．]+[(（（]?";
+	/**
+	 * 数字标题
+	 */
+	private static String NUMBER_INDEX_REG = "^([1-9][0-9]+)";
 	/**
 	 * 选择题选项正则1，形如：A.
 	 */
@@ -159,55 +163,45 @@ public class AnalysisUtil {
 		String itemId = "";
 		int subjectNum = 0; // 题型下总共的题目数量
 		boolean isSubTitle = false;
+		boolean isOption = false;
+		boolean isCount = true;
 		for (Element e : contents) {
 			AnalysisWordAO ao = new AnalysisWordAO();
-			// 处理content
-			// 如果是表格
-			if(e.tagName().equalsIgnoreCase(TABLE)) {
-				ao.setContent(e.toString());
-			} else {
-				Elements ps = e.select(P);
-				StringBuilder htmlContent = new StringBuilder();
-				for(Element p : ps) {
-					// 处理空格
-					List<TextNode> texts = p.textNodes();
-					if(!CollectionUtils.isEmpty(texts)) {
-						for(TextNode node : texts) {
-							if(node.text().contains(" ") || node.text().contains("	")) {
-								htmlContent.append(TAB);
-								break;
-							} 
-						}
-					}
-					if(isDocx) {
-						htmlContent.append(convertDocxText(p));
-					} else {
-						htmlContent.append(convertDocText(p, docCssMap));
-					}
-				}
-				ao.setContent(htmlContent.toString());
-			}
 			// text的起始为一，二，三。。。。则默认为大标题，
 			String text = e.text();
 			if (StringUtils.isNotEmpty(text)) {
+				// TODO
+				// 如果不处理答案和解析，那么，在划分题型时，删掉了答案部分（答案部分题型id与题目部分是一致的，会不会引起题量问题？）
+				if(text.indexOf("参考答案与试题解析") != -1 || text.startsWith("参考答案")
+						|| text.startsWith("试题解析")) { // 这里暂时以这个为分界处理吧
+					isCount = false;
+				}
 				int length = text.length();
-				if (length > 3) {
+				if (length >= 4) {
 					String subName = text.substring(0, 1); // 大题
 					if(TITLE_INDEX.contains(subName)) { // 题型，作为归类，统计其类型下总共的题数
+						isOption = checkOption(text);
 						isSubTitle = true;
 						ques = getSubjectName(text, quesMap);
 						itemId = StringUtil.generaterId();
 						subjectNum = 0;
 					} else {
 						isSubTitle = false;
-						String index = text.substring(0, 3); // 小题
-						if (Pattern.matches(SUB_INDEX_REG, index)) { // 题目，使用同一个itemId
-							itemId = StringUtil.generaterId();
-							subjectNum += 1;
-							if(ques != null) {
-								subjectMap.put(ques.getName(), subjectNum);
-								questionTypeIdMap.put(ques.getName(), ques.getQuestionTypeId());
-								questionNameIdMap.put(ques.getName(), ques.getId());
+						if(isCount) {
+							String index = text.substring(0, 2); // 小题
+							if(Pattern.matches(NUMBER_INDEX_REG, index)) {
+								index = text.substring(0, 4);
+							} else {
+								index = text.substring(0, 3);
+							}
+							if (Pattern.matches(SUB_INDEX_REG, index)) { // 题目，使用同一个itemId
+								itemId = StringUtil.generaterId();
+								subjectNum += 1;
+								if(ques != null) {
+									subjectMap.put(ques.getName(), subjectNum);
+									questionTypeIdMap.put(ques.getName(), ques.getQuestionTypeId());
+									questionNameIdMap.put(ques.getName(), ques.getId());
+								}
 							}
 						}
 					}
@@ -215,14 +209,49 @@ public class AnalysisUtil {
 					ao.setOptions(convertOptions(text, e));
 				}
 			}
+			// 处理content
+			if(e.tagName().equalsIgnoreCase(TABLE)) { // 如果是表格，则直接引用，不处理格式
+				ao.setContent(e.toString());
+			} else {
+				Elements ps = e.select(P);
+				StringBuilder htmlContent = new StringBuilder();
+				for(Element p : ps) {
+					if(isDocx) {
+						if(isOption) { // 选择题处理空格，其他不处理
+							if(p.text().length() >=2 && Pattern.matches(OPTION_REG_1, p.text().substring(0, 2))
+									&& !p.text().startsWith("A")) {
+								htmlContent.append(TAB);
+							}
+						}
+						htmlContent.append(convertDocxText(p));
+					} else {
+						if(isOption) { // 选择题处理空格，其他不处理
+							List<TextNode> texts = p.textNodes();
+							if(!CollectionUtils.isEmpty(texts)) {
+								for(TextNode node : texts) {
+									if(node.text().contains(" ") || node.text().contains("	")) {
+										htmlContent.append(TAB);
+										break;
+									} 
+								}
+							}
+						}
+						htmlContent.append(convertDocText(p, docCssMap));
+					}
+				}
+				ao.setContent(htmlContent.toString());
+			}
 			ao.setText(text);
 			ao.setAnser(false);
 			if(!isSubTitle && ques != null) {
-				ao.setQuestionTypeId(null == ques.getQuestionTypeId() ? 0 : ques.getQuestionTypeId());
 				ao.setItemId(itemId);
+				ao.setQuestionTypeId(null == ques.getQuestionTypeId() ? 0 : ques.getQuestionTypeId());
+				ao.setId(null == ques.getId() ? 0 : ques.getId());
 			}
+			ao.setContentId(StringUtil.generaterId());
 			content.add(ao);
 		}
+		// 统计题量
 		if(subjectMap.size() > 0) {
 			for(String name : subjectMap.keySet()) {
 				SubjectAO sub = new SubjectAO();
@@ -245,7 +274,8 @@ public class AnalysisUtil {
 	 * @return
 	 */
 	private static QuesTypeAO getSubjectName(String title, Map<String, QuesTypeAO> quesMap) {
-		QuesTypeAO questAO = new QuesTypeAO();
+//		QuesTypeAO questAO = new QuesTypeAO();
+		QuesTypeAO questAO = null; // 没有就返回空，不处理统计了
 		String subjectName = "";
 		if(!CollectionUtils.isEmpty(quesMap)) {
 			for(String name : quesMap.keySet()) {
@@ -256,22 +286,24 @@ public class AnalysisUtil {
 				}
 			}
 		}
-		if("".equals(subjectName)) { // 如果没有匹配到，取题目
-			title = title.replace("(", "@").replace("（", "@").replace("（", "@");
-			String[] names = title.split("@");
-			if(names.length >0) {
-				String mixTitle = names[0].replace("、", "@").replace("、", "@").replace(".", "@").replace("．", "@"); 
-				if(mixTitle.split("@").length > 0) {
-					subjectName = mixTitle.split("@")[1];
-				}
-			} else {
-				subjectName = title;
-			}
-			questAO.setName(subjectName);
-			// 随机生成一个数作为questionTypeId
-			questAO.setQuestionTypeId(RandomUtils.nextInt(1, 100));
-			questAO.setId(RandomUtils.nextInt(5000, 9999));
-		}
+		// 2020-08-28
+		// 没有就不统计了
+//		if("".equals(subjectName)) { // 如果没有匹配到，取题目
+//			title = title.replace("(", "@").replace("（", "@").replace("（", "@");
+//			String[] names = title.split("@");
+//			if(names.length >0) {
+//				String mixTitle = names[0].replace("、", "@").replace("、", "@").replace(".", "@").replace("．", "@"); 
+//				if(mixTitle.split("@").length > 0) {
+//					subjectName = mixTitle.split("@")[1];
+//				}
+//			} else {
+//				subjectName = title;
+//			}
+//			questAO.setName(subjectName);
+//			// 随机生成一个数作为questionTypeId
+//			questAO.setQuestionTypeId(RandomUtils.nextInt(100, 999));
+//			questAO.setId(RandomUtils.nextInt(5000, 9999));
+//		}
 		return questAO;
 	}
 	
@@ -285,7 +317,7 @@ public class AnalysisUtil {
 			return false;
 		}
 		if (text.indexOf("选择") != -1 || text.indexOf("单选") != -1 || text.indexOf("单项选择") != -1
-				|| text.indexOf("多选") != -1 || text.indexOf("多项选择") != -1) {
+				|| text.indexOf("多选") != -1 || text.indexOf("多项选择") != -1 || text.indexOf("不定项选择") != -1) {
 			return true;
 		}
 		return false;
