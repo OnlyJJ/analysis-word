@@ -1,9 +1,11 @@
 package com.gszuoye.analysis.service;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
@@ -29,14 +31,15 @@ public class AnalysisWordService {
 	 * @return
 	 * @throws Exception
 	 */
-	public AnalysisWordResult parseWord(AnalysisWordParam param) throws BusinessException {
+	public AnalysisWordResult parseWord(AnalysisWordParam param) throws Exception {
 		String filePath = param.getFilePath();
 		if(StringUtils.isEmpty(filePath)) {
 			throw new BusinessException("文件路径不能为空"); 
 		}
-		String[] files = filePath.split("\\.");
-		if(files.length < 2) {
-			throw new BusinessException("文件格式不正确");
+		File file = new File(filePath);
+		String extension = FilenameUtils.getExtension(file.getName());
+		if(StringUtils.isEmpty(extension)) {
+			throw new BusinessException("文件格式错误");
 		}
 		Integer subjectId = param.getSubjectId();
 		if(subjectId == null) {
@@ -48,7 +51,7 @@ public class AnalysisWordService {
 		}
 		// 题型列表
 		Map<String, QuesTypeAO> quesMap = getSubjectType(subjectId);
-		String suffix = files[1].toLowerCase();
+		String suffix = extension.toLowerCase();
 		if(Constants.IMG_CONT.indexOf((suffix)) != -1) { // 统一图片处理
 			suffix = Constants.IMG_PNG;
 		}

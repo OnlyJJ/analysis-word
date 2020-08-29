@@ -1,8 +1,5 @@
 package com.gszuoye.analysis.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.gszuoye.analysis.factory.AnalysisFactory;
 
 /**
@@ -10,19 +7,14 @@ import com.gszuoye.analysis.factory.AnalysisFactory;
  *
  */
 public class AnalysisContext {
-	private static Logger LOG = LoggerFactory.getLogger(AnalysisContext.class);
 	
 	/**
 	 * 获取解析者
 	 * @param fileType 文件类型
 	 * @return
+	 * @throws Exception 
 	 */
-	public static AnalysisWordAbstract getAnalysisHandle(String fileType) {
-		try {
-			return AnalysisFactory.getInstance().getWordAnalysisAbstract(fileType);
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return null;
+	public static AnalysisWordAbstract getAnalysisHandle(String fileType) throws Exception {
+		return AnalysisFactory.getInstance().getWordAnalysisAbstract(fileType);
 	}
 }

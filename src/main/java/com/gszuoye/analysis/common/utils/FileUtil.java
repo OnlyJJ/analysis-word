@@ -5,8 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -196,6 +198,51 @@ public class FileUtil {
 			imgSize--;
 		};
 		return ossMap;
+	}
+	
+	/**
+	 * base64图片生成本地文件
+	 * @param base64Data
+	 * @param filePath
+	 * @return
+	 */
+	public static String base64ConvertFile(String base64Data, String filePath) {
+		OutputStream os = null;
+		String fileName = "";
+		try {
+			// Base64解码
+			byte[] b;
+			String[] baseStrs = base64Data.split(",");
+			if (baseStrs.length < 1) {
+				b = Base64.getDecoder().decode(base64Data);
+			} else {
+				b = Base64.getDecoder().decode(baseStrs[1]);
+			}
+			for (int i = 0; i < b.length; ++i) {
+				if (b[i] < 0) {
+					b[i] += 256;
+				}
+			}
+			File imgPath = new File(filePath);
+			if (!imgPath.exists()) {
+				imgPath.mkdirs();
+			}
+			fileName = filePath + "/" + StringUtil.generaterId() + ".png";
+			File file = new File(fileName);
+			os = new FileOutputStream(file);
+			os.write(b);
+		} catch (Exception e) {
+//	        	e.printStackTrace();
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+//						e.printStackTrace();
+				}
+			}
+		}
+		return Constants.DOMAIN + fileName.replace(Constants.ABSOLUTELY_PATH, "/profile/");
 	}
 	
 	private static final String encodingFilename(String fileName) {

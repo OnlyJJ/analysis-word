@@ -37,7 +37,7 @@ public class AnalysisFactory {
 	public AnalysisWordAbstract getWordAnalysisAbstract(String fileType) throws Exception {
 		Class<? extends AnalysisWordAbstract> clazz = strategyMap.get(fileType);
 		if(clazz == null) {
-			throw new BusinessException("文档格式错误");
+			throw new BusinessException("文件格式不支持");
 		}
 		return ApplicationContextHelper.getBean(clazz);
 	}

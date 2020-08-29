@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -24,7 +23,7 @@ import com.gszuoye.analysis.vo.result.AnalysisWordResult;
 import fr.opensagres.xdocreport.core.utils.StringUtils;
 
 /**
- * word解析处理工具
+ * word解析处理核心类
  *
  */
 public class AnalysisUtil {
@@ -94,7 +93,10 @@ public class AnalysisUtil {
 	 * 选择题选项正则2，形如：（1）A
 	 */
 	private static String OPTION_REG_2 = "^[(（（]{1}[1-9]*[)））]{1}[A-Z]{1}";
-	
+	/**
+	 * 默认文件名，用于创建文件时hash，保证正确
+	 */
+	private static final String DEFAULT_FINENAME = "试卷解析图片";	
 	
 	/**
 	 * 解析doc
@@ -152,7 +154,7 @@ public class AnalysisUtil {
 			contents = doc.select(DIV);
 		} else {
 			contents = doc.select(BODY);
-			docCssMap =convertDocCss(style);
+			docCssMap = convertDocCss(style);
 		}
 		List<AnalysisWordAO> content = new ArrayList<AnalysisWordAO>(256);
 		List<SubjectAO> subjects = new ArrayList<SubjectAO>();
@@ -165,8 +167,20 @@ public class AnalysisUtil {
 		boolean isSubTitle = false;
 		boolean isOption = false;
 		boolean isCount = true;
+		final String imagepath = FileUtil.genFilePath(title.equals("") ? DEFAULT_FINENAME : title);
 		for (Element e : contents) {
 			AnalysisWordAO ao = new AnalysisWordAO();
+			// docx需要处理图片路径
+			if(isDocx) {
+				Elements imgs = e.select(IMG_SRC);
+				if(imgs != null && imgs.size() >0) {
+					for(Element img : imgs) {
+						String src = img.attr(SRC);
+						String ossPath = FileUtil.base64ConvertFile(src, imagepath);
+						img.attr(SRC, ossPath);
+					}
+				}
+			}
 			// text的起始为一，二，三。。。。则默认为大标题，
 			String text = e.text();
 			if (StringUtils.isNotEmpty(text)) {
@@ -205,7 +219,7 @@ public class AnalysisUtil {
 							}
 						}
 					}
-					// 把text的ABCD。。。选项，拆分成数组
+					// 把text的ABCD选项，拆分成数组
 					ao.setOptions(convertOptions(text, e));
 				}
 			}
@@ -276,11 +290,11 @@ public class AnalysisUtil {
 	private static QuesTypeAO getSubjectName(String title, Map<String, QuesTypeAO> quesMap) {
 //		QuesTypeAO questAO = new QuesTypeAO();
 		QuesTypeAO questAO = null; // 没有就返回空，不处理统计了
-		String subjectName = "";
+//		String subjectName = "";
 		if(!CollectionUtils.isEmpty(quesMap)) {
 			for(String name : quesMap.keySet()) {
 				if(title.indexOf(name) != -1) {
-					subjectName = name;
+//					subjectName = name;
 					questAO = quesMap.get(name);
 					break;
 				}
