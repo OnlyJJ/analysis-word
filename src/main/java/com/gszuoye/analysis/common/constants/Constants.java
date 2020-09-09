@@ -37,7 +37,9 @@ public class Constants {
 	/**
 	 * 域名
 	 */
-	public static final String DOMAIN = "https://jj.gszuoye.com";
+//	public static final String DOMAIN = "https://jj.gszuoye.com";
+	public static final String DOMAIN = "https://api.gszuoye.com"; // 正式
+//	public static final String DOMAIN = "http://182.92.99.240:9999";
 	/**
 	 * 绝对路径
 	 */
@@ -50,7 +52,6 @@ public class Constants {
 	 * 临时文件目录
 	 */
 	public static final String FILE_PATH = "/home/zuoye/temp/word/";
-//	public static final String FILE_PATH = "E://myworkspace//wordPOI//img";
 	
 	/**
 	 * oss上传接口
@@ -59,5 +60,6 @@ public class Constants {
 	/**
 	 * 题型获取接口
 	 */
-	public static final String SUBJECT_TYPE_URL = "https://test.gszuoye.com/paperupload/list/questype.do";
+//	public static final String SUBJECT_TYPE_URL = "https://test.gszuoye.com/paperupload/list/questype.do";
+	public static final String SUBJECT_TYPE_URL = "https://api.gszuoye.com/paperupload/list/questype.do"; // 正式
 }

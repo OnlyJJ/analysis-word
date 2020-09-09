@@ -22,8 +22,10 @@ import fr.opensagres.xdocreport.core.utils.StringUtils;
 
 @Service
 public class AnalysisWordService {
-	
-	private Map<String, Map<String, QuesTypeAO>> subMap = new ConcurrentHashMap<String, Map<String, QuesTypeAO>>();
+	/**
+	 * 题型缓存
+	 */
+	private Map<String, Map<String, QuesTypeAO>> subCahe = new ConcurrentHashMap<String, Map<String, QuesTypeAO>>();
 	
 	/**
 	 * 解析word
@@ -67,8 +69,8 @@ public class AnalysisWordService {
 	public Map<String, QuesTypeAO> getSubjectType(Integer subjectId) throws BusinessException {
 		// 考虑到性能，这里原本做了下缓存的
 //		String subId = String.valueOf(subjectId);
-//		if (subMap.containsKey(subId)) {
-//			return subMap.get(subId);
+//		if (subCahe.containsKey(subId)) {
+//			return subCahe.get(subId);
 //		}
 		JSONObject param = new JSONObject();
 		param.put(Constants.SUBJECT_ID_KEY, subjectId);

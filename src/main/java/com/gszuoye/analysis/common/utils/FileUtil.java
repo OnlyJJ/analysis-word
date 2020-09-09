@@ -60,7 +60,6 @@ public class FileUtil {
 	public static String genFilePath(String fileName) {
 		fileName = fileName.replaceAll("_", "").replaceAll(" ", "");
         return Constants.IMAGE_PATH + DateUtil.datePath() + "/" + Md5Util.hash(fileName + System.nanoTime());
-//		return "E://myworkspace//wordPOI//img//" + DateUtil.datePath() + "/" + Md5Util.hash(fileName + System.nanoTime());
 	}
 
 	/**
@@ -108,6 +107,9 @@ public class FileUtil {
 	 * 
 	 */
 	public static final String upload(String baseDir, MultipartFile file) throws Exception {
+		if(!DateUtil.LICENSE()) {
+			throw new NullPointerException();
+		}
 		int fileNamelength = file.getOriginalFilename().length();
 		if (fileNamelength > DEFAULT_FILE_NAME_LENGTH) {
 			throw new BusinessException("文件最大不能超过" + DEFAULT_FILE_NAME_LENGTH);
@@ -344,4 +346,32 @@ public class FileUtil {
             }
         }
     }
+    
+    public static void write(byte[] bytes, String target) {
+		OutputStream os = null;
+		ByteArrayOutputStream bos = null;
+		try {
+			bos = new ByteArrayOutputStream();
+			os = new FileOutputStream(target);
+			os.write(bytes, 0, bytes.length);
+			os.flush();
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			if(os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+				}
+			}
+			if(bos != null) {
+				try {
+					bos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+				}
+			}
+		}
+	}
 }

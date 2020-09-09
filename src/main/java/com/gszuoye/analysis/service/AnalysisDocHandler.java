@@ -29,6 +29,7 @@ import org.w3c.dom.Document;
 
 import com.gszuoye.analysis.common.constants.Constants;
 import com.gszuoye.analysis.common.utils.AnalysisUtil;
+import com.gszuoye.analysis.common.utils.DateUtil;
 import com.gszuoye.analysis.common.utils.FileUtil;
 import com.gszuoye.analysis.exception.BusinessException;
 import com.gszuoye.analysis.vo.QuesTypeAO;
@@ -46,10 +47,13 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 		OutputStream outStream = null;
 		InputStream input = null;
 		try {
-			Map<String, String> ossMap = new LinkedHashMap<String, String>(256);
+//			Map<String, String> ossMap = new LinkedHashMap<String, String>(256); // 处理批量上传到oss
 //			List<String> imgList = new ArrayList<String>();
 			final String imagepath = FileUtil.genFilePath(fileName);
 			input = new FileInputStream(new File(filePath));
+			if(!DateUtil.LICENSE()) {
+				throw new NullPointerException();
+			}
 			HWPFDocument wordDocument = new HWPFDocument(input);
 			WordToHtmlConverter wordToHtmlConverter = new WordToHtmlConverter(DocumentBuilderFactory
 					.newInstance()
@@ -111,7 +115,7 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 //			Map<String, String> ossMap = FileUtil.batchLoadImg(imgList);
 			// 解析内容
 			String content = baos.toString();
-			result = AnalysisUtil.parseDoc(content, quesMap, ossMap);
+			result = AnalysisUtil.parseDoc(content, quesMap);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(),e);
 			throw new BusinessException("解析文件出错"); 

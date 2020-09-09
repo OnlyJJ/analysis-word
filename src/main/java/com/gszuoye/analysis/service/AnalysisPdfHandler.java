@@ -34,7 +34,6 @@ public class AnalysisPdfHandler extends AnalysisWordAbstract {
 			baos = new ByteArrayOutputStream();
 	        outStream = new BufferedOutputStream(baos);
 			PDDocument pdf = PDDocument.load(new File(filePath));
-//			output = new PrintWriter("F:\\pdf.html", "utf-8"); // 输出html
 			output = new PrintWriter(outStream, true);
 			PDFDomTree tree = new PDFDomTree();
 			tree.writeText(pdf, output);

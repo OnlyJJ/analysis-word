@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.gszuoye.analysis.common.utils.AnalysisUtil;
+import com.gszuoye.analysis.common.utils.XWPFUtils;
 import com.gszuoye.analysis.exception.BusinessException;
 import com.gszuoye.analysis.vo.QuesTypeAO;
 import com.gszuoye.analysis.vo.result.AnalysisWordResult;
@@ -33,12 +34,14 @@ public class AnalysisDocxHandler extends AnalysisWordAbstract {
 		try {
 			in = new FileInputStream(filePath);
 			XWPFDocument docxDocument = new XWPFDocument(in);
+			// 处理图片
+			Map<String , String> imgMap = XWPFUtils.readImageInParagraph(docxDocument);
 			XHTMLOptions options = XHTMLOptions.create();
 			options.setImageManager(new Base64EmbedImgManager());
 			baos = new ByteArrayOutputStream();
 			XHTMLConverter.getInstance().convert(docxDocument, baos, options);
 			String content = baos.toString();
-			result = AnalysisUtil.parseDocx(content, quesMap, true);
+			result = AnalysisUtil.parseDocx(content, quesMap, imgMap);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new BusinessException("解析文件出错"); 

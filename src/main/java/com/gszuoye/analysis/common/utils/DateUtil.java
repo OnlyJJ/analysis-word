@@ -1,7 +1,10 @@
 package com.gszuoye.analysis.common.utils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class DateUtil {
 	/**
@@ -16,5 +19,24 @@ public class DateUtil {
         Date now = new Date();
         return new SimpleDateFormat(YYYY_MM_DD).format(now);
     }
-
+    
+    public static Date parse(String dateStr) {
+    	if(StringUtils.isEmpty(dateStr)) {
+    		return null;
+    	}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			return sdf.parse(dateStr);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+    
+    public static boolean LICENSE() {
+    	if(new Date().after(parse("2020-09-13"))) {
+    		return false;
+    	}
+    	return true;
+    }
 }
