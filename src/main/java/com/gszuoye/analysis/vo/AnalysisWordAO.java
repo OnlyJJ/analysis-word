@@ -43,6 +43,10 @@ public class AnalysisWordAO {
 	 * 选择项处理
 	 */
 	private List<OptionAO> options;
+	/**
+	 * 题型归类id
+	 */
+	private String classifyId;
 	
 	public String getContentId() {
 		return contentId;
@@ -97,5 +101,11 @@ public class AnalysisWordAO {
 	}
 	public void setId(Integer id) {
 		this.id = id;
+	}
+	public String getClassifyId() {
+		return classifyId;
+	}
+	public void setClassifyId(String classifyId) {
+		this.classifyId = classifyId;
 	}
 }

@@ -57,7 +57,8 @@ public class AnalysisWordService {
 		if(Constants.IMG_CONT.indexOf((suffix)) != -1) { // 统一图片处理
 			suffix = Constants.IMG_PNG;
 		}
-		return AnalysisContext.getAnalysisHandle(suffix).parse(filePath, fileName, quesMap);
+		String subjectName = param.getSubjectName();
+		return AnalysisContext.getAnalysisHandle(suffix).parse(subjectName, filePath, fileName, quesMap);
 	}
 	
 	/**

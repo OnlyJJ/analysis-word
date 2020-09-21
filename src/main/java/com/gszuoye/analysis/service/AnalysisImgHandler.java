@@ -1,6 +1,8 @@
 package com.gszuoye.analysis.service;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import com.gszuoye.analysis.common.utils.Base64Util;
 import com.gszuoye.analysis.common.utils.FileUtil;
 import com.gszuoye.analysis.common.utils.HttpUtil;
 import com.gszuoye.analysis.exception.BusinessException;
+import com.gszuoye.analysis.vo.AnalysisWordAO;
 import com.gszuoye.analysis.vo.QuesTypeAO;
 import com.gszuoye.analysis.vo.result.AnalysisWordResult;
 
@@ -31,32 +34,32 @@ public class AnalysisImgHandler extends AnalysisWordAbstract {
 	private static final String BAIDU_ORC_URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic";
 
 	@Override
-	public AnalysisWordResult parse(String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
+	public AnalysisWordResult parse(String subjectName, String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
 		AnalysisWordResult result = new AnalysisWordResult();
 		try {
 			byte[] imgData = FileUtil.readFileByBytes(filePath);
 			String imgStr = Base64Util.encode(imgData);
 			String imgParam = URLEncoder.encode(imgStr, "UTF-8");
-
 			String param = "image=" + imgParam;
 
 			// 注意
 			// 这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
 			String accessToken = BaiduAuthService.getAuth();
-
+			List<AnalysisWordAO> content = new ArrayList<AnalysisWordAO>(256);
 			String res = HttpUtil.post(BAIDU_ORC_URL, accessToken, param);
 			JSONObject words = JSONObject.parseObject(res);
-			StringBuilder content = new StringBuilder();
 			if (words.containsKey("words_result")) {
 				JSONArray arrays = JSONObject.parseArray(words.getString("words_result"));
 				if (arrays.size() > 0) {
 					arrays.stream().forEach(w -> {
+						AnalysisWordAO ao = new AnalysisWordAO();
 						JSONObject json = (JSONObject) JSONObject.toJSON(w);
-						content.append(json.getString("words"));
+						ao.setContent(json.getString("words"));
+            			content.add(ao);
 					});
 				}
 			}
-			result.setDoc(content.toString());
+			result.setContent(content);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new BusinessException("该图片格式异常");

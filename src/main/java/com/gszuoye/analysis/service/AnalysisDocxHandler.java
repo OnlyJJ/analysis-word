@@ -27,7 +27,7 @@ public class AnalysisDocxHandler extends AnalysisWordAbstract {
 	private Logger LOG = LoggerFactory.getLogger(AnalysisDocxHandler.class);
 			
 	@Override
-	public AnalysisWordResult parse(String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
+	public AnalysisWordResult parse(String subjectName, String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
 		AnalysisWordResult result = null;
 		ByteArrayOutputStream baos = null;
 		InputStream in = null;
@@ -41,7 +41,7 @@ public class AnalysisDocxHandler extends AnalysisWordAbstract {
 			baos = new ByteArrayOutputStream();
 			XHTMLConverter.getInstance().convert(docxDocument, baos, options);
 			String content = baos.toString();
-			result = AnalysisUtil.parseDocx(content, quesMap, imgMap);
+			result = AnalysisUtil.parseDocx(subjectName, content, quesMap, imgMap);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new BusinessException("解析文件出错"); 

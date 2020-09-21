@@ -17,7 +17,7 @@ public class AnalysisUtil {
 	 * @param quesMap 题型
 	 * @return
 	 */
-	public static AnalysisWordResult parseDoc(String word, Map<String, QuesTypeAO> quesMap) {
+	public static AnalysisWordResult parseDoc(String subjectName, String word, Map<String, QuesTypeAO> quesMap) {
 		return DocParseUtil.parse(word, quesMap);
 	}
 	
@@ -28,8 +28,8 @@ public class AnalysisUtil {
 	 * @param imgMap 图片索引
 	 * @return
 	 */
-	public static AnalysisWordResult parseDocx(String word, Map<String, QuesTypeAO> quesMap, Map<String , String> imgMap) {
-		return DocxParseUtil.parse(word, quesMap, imgMap);
+	public static AnalysisWordResult parseDocx(String subjectName, String word, Map<String, QuesTypeAO> quesMap, Map<String , String> imgMap) {
+		return DocxParseUtil.parse(subjectName, word, quesMap, imgMap);
 	}
 	
 }

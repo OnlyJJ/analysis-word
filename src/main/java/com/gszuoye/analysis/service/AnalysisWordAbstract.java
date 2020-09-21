@@ -13,5 +13,5 @@ public abstract class AnalysisWordAbstract {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract AnalysisWordResult parse(String filePath, String fileName, Map<String, QuesTypeAO> quesMap);
+	public abstract AnalysisWordResult parse(String subjectName, String filePath, String fileName, Map<String, QuesTypeAO> quesMap);
 }

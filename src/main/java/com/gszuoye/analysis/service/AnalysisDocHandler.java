@@ -41,7 +41,7 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 	private Logger LOG = LoggerFactory.getLogger(AnalysisDocHandler.class);
 
 	@Override
-	public AnalysisWordResult parse(String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
+	public AnalysisWordResult parse(String subjectName, String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
 		AnalysisWordResult result = null;
 		ByteArrayOutputStream baos = null;
 		OutputStream outStream = null;
@@ -115,7 +115,7 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 //			Map<String, String> ossMap = FileUtil.batchLoadImg(imgList);
 			// 解析内容
 			String content = baos.toString();
-			result = AnalysisUtil.parseDoc(content, quesMap);
+			result = AnalysisUtil.parseDoc(subjectName, content, quesMap);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(),e);
 			throw new BusinessException("解析文件出错"); 

@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.gszuoye.analysis.common.utils.PDFParseUtil;
 import com.gszuoye.analysis.exception.BusinessException;
 import com.gszuoye.analysis.vo.QuesTypeAO;
 import com.gszuoye.analysis.vo.result.AnalysisWordResult;
@@ -25,19 +26,20 @@ public class AnalysisPdfHandler extends AnalysisWordAbstract {
 	private Logger LOG = LoggerFactory.getLogger(AnalysisPdfHandler.class);
 
 	@Override
-	public AnalysisWordResult parse(String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
+	public AnalysisWordResult parse(String subjectName, String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
 		AnalysisWordResult result = new AnalysisWordResult();
 		Writer output = null;
 		ByteArrayOutputStream baos = null;
 		OutputStream outStream = null;
+		PDDocument pdf = null;
 		try {
 			baos = new ByteArrayOutputStream();
 	        outStream = new BufferedOutputStream(baos);
-			PDDocument pdf = PDDocument.load(new File(filePath));
+			pdf = PDDocument.load(new File(filePath));
 			output = new PrintWriter(outStream, true);
 			PDFDomTree tree = new PDFDomTree();
 			tree.writeText(pdf, output);
-			result.setDoc(baos.toString());
+			result = PDFParseUtil.parse(baos.toString());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new BusinessException("解析异常");
@@ -57,6 +59,13 @@ public class AnalysisPdfHandler extends AnalysisWordAbstract {
 			if(outStream != null) {
 				try {
 					outStream.close();
+				} catch (IOException e) {
+					LOG.warn(e.getMessage(),e);
+				}
+			}
+			if(pdf != null) {
+				try {
+					pdf.close();
 				} catch (IOException e) {
 					LOG.warn(e.getMessage(),e);
 				}

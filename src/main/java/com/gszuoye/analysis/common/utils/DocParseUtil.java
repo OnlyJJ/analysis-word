@@ -121,7 +121,9 @@ public class DocParseUtil {
 		Map<String, Integer> questionTypeIdMap = new HashMap<String, Integer>();
 		Map<String, Integer> questionNameIdMap = new HashMap<String, Integer>();
 		QuesTypeAO ques = null;
+		SubjectAO sub = null;
 		String itemId = "";
+		String classifyId = "";
 		int subjectNum = 0; // 题型下总共的题目数量
 		boolean isSubTitle = false;
 		boolean isOption = false;
@@ -155,7 +157,13 @@ public class DocParseUtil {
 						isSubTitle = true;
 						ques = getSubjectName(text, quesMap);
 						itemId = StringUtil.generaterId();
+						classifyId = StringUtil.generaterId(); // 题型归类id与大题id一致
 						subjectNum = 0;
+						if(ques != null) {
+							sub = new SubjectAO();
+							sub.setClassifyId(classifyId);
+							subjects.add(sub);
+						}
 					} else {
 						isSubTitle = false;
 						if(isCount) {
@@ -167,6 +175,13 @@ public class DocParseUtil {
 									subjectMap.put(ques.getName(), subjectNum);
 									questionTypeIdMap.put(ques.getName(), ques.getQuestionTypeId());
 									questionNameIdMap.put(ques.getName(), ques.getId());
+									// 题目数量归类
+									if(sub != null) {
+										sub.setSubjectTitle(ques.getName());
+										sub.setCount(subjectNum);
+										sub.setQuestionTypeId(questionTypeIdMap.get(ques.getName()));
+										sub.setId(questionNameIdMap.get(ques.getName()));
+									}
 								}
 							}
 						}
@@ -253,20 +268,21 @@ public class DocParseUtil {
 				ao.setQuestionTypeId(null == ques.getQuestionTypeId() ? 0 : ques.getQuestionTypeId());
 				ao.setId(null == ques.getId() ? 0 : ques.getId());
 			}
+			ao.setClassifyId(classifyId);
 			ao.setContentId(StringUtil.generaterId());
 			content.add(ao);
 		}
 		// 统计题量
-		if(subjectMap.size() > 0) {
-			for(String name : subjectMap.keySet()) {
-				SubjectAO sub = new SubjectAO();
-				sub.setSubjectTitle(name);
-				sub.setCount(subjectMap.get(name));
-				sub.setQuestionTypeId(questionTypeIdMap.get(name));
-				sub.setId(questionNameIdMap.get(name));
-				subjects.add(sub);
-			}
-		}
+//		if(subjectMap.size() > 0) {
+//			for(String name : subjectMap.keySet()) {
+//				SubjectAO sub = new SubjectAO();
+//				sub.setSubjectTitle(name);
+//				sub.setCount(subjectMap.get(name));
+//				sub.setQuestionTypeId(questionTypeIdMap.get(name));
+//				sub.setId(questionNameIdMap.get(name));
+//				subjects.add(sub);
+//			}
+//		}
 		result.setContent(content);
 		result.setSubjects(subjects);
 		return result;

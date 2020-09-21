@@ -2,11 +2,9 @@ package com.gszuoye.analysis.common.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,11 +68,11 @@ public class DocxParseUtil {
 	/**
 	 * 小标题正则
 	 */
-	private static String SUB_INDEX_REG = "^([1-9][0-9]*)[.、．:：]+[(（（]?";
+	private static String SUB_INDEX_REG = "^([1-9][0-9]*)[.、．:：，]+[(（（]?";
 	/**
 	 * 罗马数字
 	 */
-	private static String RFIG_REG = "^(IX|IV|V?I{0,3}){1}[.、．:：]?";
+	private static String RFIG_REG = "^(IX|IV|V|Ⅴ|Ⅳ|Ⅵ|Ⅰ|Ⅱ|Ⅲ?I{0,3}){1}[.、．:：]?";
 	/**
 	 * 选择题选项正则1，形如：A.
 	 */
@@ -82,13 +80,15 @@ public class DocxParseUtil {
 	
 	private static String OPTION_REG_3 = "[A-Z]{1}[.、．:：]+";
 	
-	private static String OPTION_REG_2 = "^[A-Z]{1}";
-	
-	private static String OPTION_REG_4 = "[.、．:：]{1}";
+	private static String OPTION_REG_5 = "^[A-Z]{1}[. 、．:：]?";
 	/**
 	 * 默认文件名，用于创建文件时hash，保证正确
 	 */
 	private static final String DEFAULT_FINENAME = "试卷解析图片";	
+	/**
+     * 是否为英语
+     */
+    private static boolean isEnglish = false;
 
 	/**
 	 * 解析doc正文
@@ -96,11 +96,12 @@ public class DocxParseUtil {
 	 * @param quesMap
 	 * @return
 	 */
-	public static AnalysisWordResult parse(String word, Map<String, QuesTypeAO> quesMap, Map<String , String> imgMap) {
+	public static AnalysisWordResult parse(String subjectName, String word, Map<String, QuesTypeAO> quesMap, Map<String , String> imgMap) {
 		AnalysisWordResult result = new AnalysisWordResult();
 		if (StringUtils.isEmpty(word)) {
 			return result;
 		}
+		isEnglish = checkEnglish(subjectName);
 		Document doc = Jsoup.parse(word);
 		// title
 		String title = "";
@@ -118,7 +119,9 @@ public class DocxParseUtil {
 		Map<String, Integer> questionTypeIdMap = new HashMap<String, Integer>();
 		Map<String, Integer> questionNameIdMap = new HashMap<String, Integer>();
 		QuesTypeAO ques = null;
+		SubjectAO sub = null;
 		String itemId = "";
+		String classifyId = "";
 		int subjectNum = 0; // 题型下总共的题目数量
 		boolean isSubTitle = false;
 		boolean isOption = false;
@@ -148,12 +151,18 @@ public class DocxParseUtil {
 				int length = text.length();
 				if (length >= 4) {
 					String subName = text.substring(0, 1); // 大题
-					if(TITLE_INDEX.contains(subName) || matchRfig(text.substring(0, 4))) { // 题型，作为归类，统计其类型下总共的题数
+					if(TITLE_INDEX.contains(subName) || (isEnglish && matchRfig(text.substring(0, 4)))) { // 题型，作为归类，统计其类型下总共的题数
 						isOption = checkOption(text);
 						isSubTitle = true;
 						ques = getSubjectName(text, quesMap);
 						itemId = StringUtil.generaterId();
+						classifyId = StringUtil.generaterId(); // 题型归类id与大题id一致
 						subjectNum = 0;
+						if(ques != null) {
+							sub = new SubjectAO();
+							sub.setClassifyId(classifyId);
+							subjects.add(sub);
+						}
 					} else {
 						isSubTitle = false;
 						if(isCount) {
@@ -165,6 +174,13 @@ public class DocxParseUtil {
 									subjectMap.put(ques.getName(), subjectNum);
 									questionTypeIdMap.put(ques.getName(), ques.getQuestionTypeId());
 									questionNameIdMap.put(ques.getName(), ques.getId());
+									// 题目数量归类
+									if(sub != null) {
+										sub.setSubjectTitle(ques.getName());
+										sub.setCount(subjectNum);
+										sub.setQuestionTypeId(questionTypeIdMap.get(ques.getName()));
+										sub.setId(questionNameIdMap.get(ques.getName()));
+									}
 								}
 							}
 						}
@@ -172,7 +188,7 @@ public class DocxParseUtil {
 					// 把text的ABCD选项，拆分成数组
 //					ao.setOptions(convertOptions(text, e, imgMap));
 					List<OptionAO> opts = null;
-					Map<String, OptionAO> ops = convertOptions2(text, e, imgMap);
+					Map<String, OptionAO> ops = convertOptions(text, e, imgMap);
 					if(ops != null && ops.size() >0) {
 						opts = new ArrayList<OptionAO>();
 						for(String key : ops.keySet()) {
@@ -248,20 +264,21 @@ public class DocxParseUtil {
 				ao.setQuestionTypeId(null == ques.getQuestionTypeId() ? 0 : ques.getQuestionTypeId());
 				ao.setId(null == ques.getId() ? 0 : ques.getId());
 			}
+			ao.setClassifyId(classifyId);
 			ao.setContentId(StringUtil.generaterId());
 			content.add(ao);
 		}
 		// 统计题量
-		if(subjectMap.size() > 0) {
-			for(String name : subjectMap.keySet()) {
-				SubjectAO sub = new SubjectAO();
-				sub.setSubjectTitle(name);
-				sub.setCount(subjectMap.get(name));
-				sub.setQuestionTypeId(questionTypeIdMap.get(name));
-				sub.setId(questionNameIdMap.get(name));
-				subjects.add(sub);
-			}
-		}
+//		if(subjectMap.size() > 0) {
+//			for(String name : subjectMap.keySet()) {
+//				SubjectAO sub = new SubjectAO();
+//				sub.setSubjectTitle(name);
+//				sub.setCount(subjectMap.get(name));
+//				sub.setQuestionTypeId(questionTypeIdMap.get(name));
+//				sub.setId(questionNameIdMap.get(name));
+//				subjects.add(sub);
+//			}
+//		}
 		result.setContent(content);
 		result.setSubjects(subjects);
 		return result;
@@ -357,353 +374,38 @@ public class DocxParseUtil {
 	 * @param e
 	 * @return
 	 */
-	private static List<OptionAO> convertOptions(String p, Element e, Map<String, String> imgMap) {
-		List<OptionAO> options = null;
-		String subject = p.substring(0, 2);
-		if (!Pattern.matches(OPTION_REG_1, subject)) {
-			return options;
-		}
-		if (e.tagName().equalsIgnoreCase(TABLE)) {
-			return options;
-		}
-		Elements ps = e.select(P);
-		boolean noSpan = false;
-		if (ps == null || ps.size() <= 0) {
-			noSpan = true;
-		}
-		options = new ArrayList<OptionAO>();
-		OptionAO option = null;
-		StringBuilder tx = null;
-		boolean isOption = false;
-		String sel = "A"; // 默认从A开始
-		// 一个p中只有一个span，并且存在多个选项，或者一个p中只有选项，没有其他标签
-		if((noSpan && StringUtils.isNotEmpty(e.text())) || (isOneline(ps.text()) && ps.size() == 1)) {
-//			handle(sel, e, imgMap, options);
-		} else {
-			// 每个span只有一个选项
-			// 修正text，有些解析结果，内容并没有被标签包裹
-			String corrTxt = "";
-			if(!CollectionUtils.isEmpty(e.childNodes()) && e.childNode(0) != null) {
-				String firstTxt = e.childNode(0).toString();
-				if(firstTxt.indexOf("<div") == -1  
-						&& firstTxt.indexOf("<p") == -1 
-						&& firstTxt.indexOf("<span") == -1
-						&& firstTxt.indexOf("<img") == -1) {
-					firstTxt = XWPFUtils.replaceImg(firstTxt, imgMap);
-					corrTxt = firstTxt;
-				}
-			}
-			boolean isSpc = false;
-			String nextSel = "A";
-			int index = 0;
-			Element pre = null;
-			for (Element el : ps) {
-				if (el.hasText()) { // 文本
-					if (isOneline(el.text())) {
-//						nextSel = handle(sel, el, imgMap, options);
-						continue;
-					}
-					String content = "";
-					if(index == 0) {
-						content = corrTxt + el.text();
-					} else {
-						// 修正中间的txt
-						if(pre != null && pre.nextSibling() != null) {
-							Node next = pre.nextSibling();
-							String midTxt = next.toString();
-							if(midTxt.indexOf("<div") == -1  
-									&& midTxt.indexOf("<p") == -1 
-									&& midTxt.indexOf("<span") == -1
-									&& midTxt.indexOf("<img") == -1) {
-								midTxt = XWPFUtils.replaceImg(midTxt, imgMap);
-								content = midTxt + el.text(); //|2&lt;x    ≤3}B．{x
-							} else {
-								content = el.text();
-							}
-						} else {	
-							content = el.text();
-						}
-					}
-					if(content.length() == 1 && Pattern.matches(OPTION_REG_2, content)) {
-						Element ne = el.nextElementSibling();
-						if(ne != null && ne.text().length() == 1 && Pattern.matches(OPTION_REG_4, ne.text())) {
-							content = content + ne.text();
-						}
-					}
-					// 先判断当前text是否包含正则规则的，如果是，则拆分，把第一部分补到上一个option中，剩余的为下一次的
-					if (content.length() >= 2) {
-						if(Pattern.matches(OPTION_REG_1, content.substring(0, 2))) {
-							if (option != null) {
-								String val = tx.toString();
-								// 修正图片
-								val = XWPFUtils.replaceImg(val, imgMap);
-								option.setValue(val);
-							}
-							isOption = true;
-							option = new OptionAO();
-							option.setOption(content.substring(0, 1));
-							nextSel = content.substring(0, 1);
-							tx = new StringBuilder();
-							options.add(option);
-						} else { // 如果以A. 开头不匹配，再处理一下特殊情况，如：-1 D. ，上一个选项的末尾被span到了当前选项
-							String[] array = content.split(OPTION_REG_3, 2);
-							if(array.length > 1) {
-								if (option != null) {
-									String val = tx.append(array[0]).toString();
-									// 修正图片
-									val = XWPFUtils.replaceImg(val, imgMap);
-									option.setValue(val);
-								}
-								isSpc = true;
-								isOption = true;
-								option = new OptionAO();
-								option.setOption(nextSel);
-								tx = new StringBuilder();
-								tx.append(array[1].toString());
-								options.add(option);
-							}
-						}
-					}
-					if (isOption) {
-						if(isSpc) {
-							isSpc = false;
-							nextSel = getNextUpEn(nextSel);
-						} else {
-							if(content.length() >= 2) {
-								tx.append(content.substring(2));
-								nextSel = getNextUpEn(nextSel);
-							} else {
-								tx.append(content);
-							}
-						}
-						isOption = false;
-					} else {
-						if(tx != null) {
-							tx.append(content);
-						}
-					}
-				} else { // 图片
-					if(IMG.equalsIgnoreCase(el.tagName())) {
-						if(tx != null) {
-							tx.append(el.toString());
-						}
-					}
-				}
-				pre = el;
-				if (option != null && tx != null) {
-					if(index == (ps.size()-1)) {
-						Node next = el.nextSibling();
-						if(next != null) {
-							String midTxt = next.toString();
-							if(midTxt.indexOf("<div") == -1  
-									&& midTxt.indexOf("<p") == -1 
-									&& midTxt.indexOf("<span") == -1
-									&& midTxt.indexOf("<img") == -1) {
-								midTxt = XWPFUtils.replaceImg(midTxt, imgMap);
-								tx.append(midTxt);
-							}
-						} 
-					}
-					String val = tx.toString();
-					// 修正图片
-					val = XWPFUtils.replaceImg(val, imgMap);
-					option.setValue(val);
-				}
-				index++;
-			}
-		}
-		
-		return options;
-	}
-	
-	/**
-	 * 处理选择项
-	 * @param text
-	 * @param e
-	 * @return
-	 */
-	private static Map<String, OptionAO> convertOptions2(String p, Element e, Map<String, String> imgMap) {
+	private static Map<String, OptionAO> convertOptions(String p, Element e, Map<String, String> imgMap) {
 		Map<String, OptionAO> options = null;
 		String subject = p.substring(0, 2);
-		if (!Pattern.matches(OPTION_REG_1, subject)) {
-			return options;
+		if(isEnglish) {
+			if (!Pattern.matches(OPTION_REG_1, subject)) {
+				return options;
+			}
+		} else {
+			if (!Pattern.matches(OPTION_REG_5, subject)) {
+				return options;
+			}
 		}
 		if (e.tagName().equalsIgnoreCase(TABLE)) {
 			return options;
 		}
-		// 4 A选项出现3个A，D出现DA  9 出现2个AA， 10 出现2个AA
-		Elements ps = e.select(P);
-		boolean noSpan = false;
-		if (ps == null || ps.size() <= 0) {
-			noSpan = true;
-		}
 		options = new LinkedHashMap<String, OptionAO>();
-		OptionAO option = null;
-		StringBuilder tx = null;
-		boolean isOption = false;
-		String sel = "A"; // 默认从A开始
-		// 一个p中只有一个span，并且存在多个选项，或者一个p中只有选项，没有其他标签
-		if((noSpan && StringUtils.isNotEmpty(e.text())) || (isOneline(ps.text()) && ps.size() == 1)) {
-			handle(sel, e, imgMap, option, options);
-		} else {
-			// 每个span只有一个选项
-			// 修正text，有些解析结果，内容并没有被标签包裹
-			String corrTxt = "";
-			if(!CollectionUtils.isEmpty(e.childNodes()) && e.childNode(0) != null) {
-				String firstTxt = e.childNode(0).toString();
-				if(firstTxt.indexOf("<div") == -1  
-						&& firstTxt.indexOf("<p") == -1 
-						&& firstTxt.indexOf("<span") == -1
-						&& firstTxt.indexOf("<img") == -1) {
-					firstTxt = XWPFUtils.replaceImg(firstTxt, imgMap);
-					corrTxt = firstTxt;
-				}
-			}
-			int index = 0;
-			String nextSel = "A";
-			boolean isSpc = false;
-			boolean merge = false;
-			Element pre = null;
-			for (Element el : ps) {
-				if (el.hasText()) { // 文本
-					// 一个span里包含多个选项 A．时针　　　　B．分针      这种：  P B. d C. R
-					 if(isOneline(el.text())) {
-						 nextSel = handle(nextSel, el, imgMap, option, options);
-						 continue;
-					 } 
-					String content = "";
-					if(index == 0) {
-						content = corrTxt + el.text();
-					} else {
-						// 修正中间的txt
-						if(pre != null && pre.nextSibling() != null) {
-							Node next = pre.nextSibling();
-							String midTxt = next.toString();
-							if(midTxt.indexOf("<div") == -1  
-									&& midTxt.indexOf("<p") == -1 
-									&& midTxt.indexOf("<span") == -1
-									&& midTxt.indexOf("<img") == -1) {
-								midTxt = XWPFUtils.replaceImg(midTxt, imgMap);
-								content = midTxt + el.text(); //|2&lt;x    ≤3}B．{x
-							} else {
-								content = el.text();
-							}
-						} else {	
-							content = el.text();
-						}
-					}
-					// 这里修正D和. 被分割在两个连续的span中
-					if(content.length() == 1 && Pattern.matches(OPTION_REG_2, content)) {
-						Element ne = el.nextElementSibling();
-						if(ne != null && ne.text().length() == 1 && Pattern.matches(OPTION_REG_4, ne.text())) {
-							content = content + ne.text();
-							merge = true;
-						}
-					}
-					// 先判断当前text是否包含正则规则的，如果是，则拆分，把第一部分补到上一个option中，剩余的为下一次的
-					if (content.length() >= 2) {
-						if(Pattern.matches(OPTION_REG_1, content.substring(0, 2))) {
-							if (option != null) {
-								String val = tx.toString();
-								// 修正图片
-								val = XWPFUtils.replaceImg(val, imgMap);
-								option.setValue(val);
-							}
-							isOption = true;
-							option = new OptionAO();
-							nextSel = content.substring(0, 1);
-							option.setOption(nextSel);
-							tx = new StringBuilder();
-							options.put(nextSel, option);
-						} else { // 如果以A. 开头不匹配，再处理一下特殊情况，如：-1 D. ，上一个选项的末尾被span到了当前选项
-							String[] array = content.split(OPTION_REG_3, 2);
-							if(array.length > 1) {
-								if (option != null) {
-									String val = tx.append(array[0]).toString();
-									// 修正图片
-									val = XWPFUtils.replaceImg(val, imgMap);
-									option.setValue(val);
-								}
-								isSpc = true;
-								isOption = true;
-								option = new OptionAO();
-								option.setOption(nextSel);
-								tx = new StringBuilder();
-								tx.append(array[1].toString());
-								options.put(nextSel, option);
-							}
-						}
-					}
-					if (isOption) {
-						if(isSpc) {
-							isSpc = false;
-							nextSel = getNextUpEn(nextSel);
-						} else {
-							if(content.length() >= 2) {
-								tx.append(content.substring(2));
-								nextSel = getNextUpEn(nextSel);
-							} else {
-								tx.append(content);
-							}
-						}
-						isOption = false;
-					} else {
-						if(tx != null) {
-							if(merge) { // 已合并过的，不能再追加
-								merge = false;
-							} else {
-								tx.append(content);
-							}
-						}
-					}
-				} else { // 图片
-					if(IMG.equalsIgnoreCase(el.tagName())) {
-						if(tx != null) {
-							tx.append(el.toString());
-						}
-					}
-				}
-				pre = el;
-				if (option != null && tx != null) {
-					if(index == (ps.size()-1)) {
-						Node next = el.nextSibling();
-						if(next != null) {
-							String midTxt = next.toString();
-							if(midTxt.indexOf("<div") == -1  
-									&& midTxt.indexOf("<p") == -1 
-									&& midTxt.indexOf("<span") == -1
-									&& midTxt.indexOf("<img") == -1) {
-								midTxt = XWPFUtils.replaceImg(midTxt, imgMap);
-								tx.append(midTxt);
-							}
-						} 
-					}
-					String val = tx.toString();
-					// 修正图片
-					val = XWPFUtils.replaceImg(val, imgMap);
-					option.setValue(val);
-				}
-				index++;
+		// 这里的解决思路是，选择题按照如下统一进行：
+		// 1、取到e.text()，即不管多少个span，统一取，其结果应该为：A.XX B.XX C.XX D.XX
+		// 2、用正则拆分
+		// 3、修正图片，因为docx已经处理过图片
+		String text = e.text();
+		Map<String, String> all = getOptions(text, e);
+		if(all.size() > 0) {
+			for(String sel : all.keySet()) {
+				OptionAO option = new OptionAO();
+				option.setOption(sel);
+				String val = XWPFUtils.replaceImg(all.get(sel), imgMap);
+				option.setValue(val);
+				options.put(sel, option);
 			}
 		}
-		
 		return options;
-	}
-	
-	private static boolean isOneline(String text) {
-		if(StringUtils.isEmpty(text)) {
-			return false;
-		}
-		String rep = text.replaceAll(OPTION_REG_3, "#");
-		int count = 0;
-		while(rep.indexOf("#") >=0) {
-			rep = rep.substring(rep.indexOf("#")+1);
-			count++;
-			if(count >= 2) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	/**
@@ -748,6 +450,11 @@ public class DocxParseUtil {
 		}
 	}
 	
+	/**
+	 * 正则匹配返回下标
+	 * @param txt
+	 * @return
+	 */
 	private static Map<String, String> toIndex(String txt) {
 		Map<String, String> idxMap = new HashMap<String, String>();
 		if (StringUtils.isEmpty(txt)) {
@@ -769,62 +476,6 @@ public class DocxParseUtil {
 		return idxMap;
 	}
 	
-	private static String handle(String sel, Element e, Map<String, String> imgMap, OptionAO oldOption, Map<String, OptionAO> options) {
-		OptionAO option = null;
-		String text = e.text();
-		if (text.length() >= 2 && Pattern.matches(OPTION_REG_1, text.substring(0, 2))) {
-			sel = text.substring(0, 1);
-		} else { // 如果以A. 开头不匹配，再处理一下特殊情况，如：-1 D. ，上一个选项的末尾被span到了当前选项
-			String[] array = text.split(OPTION_REG_3, 2);
-			if(array.length > 1) {
-				if (oldOption != null) {
-					String val = oldOption.getValue() + array[0];
-					// 修正图片
-					val = XWPFUtils.replaceImg(val, imgMap);
-					oldOption.setValue(val);
-				}
-				text = text.substring(array[0].length());
-			}
-		}
-		if(!DateUtil.LICENSE()) {
-			throw new NullPointerException();
-		}
-		String[] array = text.split(OPTION_REG_3);
-		Map<String, String> idxMap = toIndex(text);
-		int idx = 1;
-		String curr = sel;
-		String next = "";
-		for(int i=0;i<array.length;i++) {
-			if(StringUtils.isEmpty(array[i])) {
-				continue;
-			}
-			option = new OptionAO();
-			option.setOption(curr);
-			next = getNextUpEn(curr);
-			if(idx == 1 && idxMap.containsKey(String.valueOf(1)) && idxMap.get(String.valueOf(1)).equals(curr)) { 
-				if((!idxMap.containsKey(String.valueOf(2)) || !idxMap.get(String.valueOf(2)).equals(next))) {
-					// 修正图片
-					String val = e.text();
-					if(val.length() > 2) {
-						val = val.substring(2); // 这里就把剩余的全部取了，B. d C. R，产生错误
-					}
-					// 修正图片
-					val = XWPFUtils.replaceImg(val, imgMap);
-					option.setValue(val); // B. d C. R，
-					options.put(curr, option);
-					break;
-				}
-			}
-			// 修正图片
-			String val = array[i];
-			val = XWPFUtils.replaceImg(val, imgMap);
-			option.setValue(val);
-			options.put(curr, option);
-			curr = next;
-			idx++;
-		}
-		return sel;
-	}
 	
 	/**
 	 * 匹配罗马数字开头的
@@ -846,5 +497,78 @@ public class DocxParseUtil {
 		}
 		return ret;
 	}
+	
+	/**
+	 * 统一选项处理，图片放在后面修正
+	 * @param txt
+	 * @param e
+	 * @return
+	 */
+	private static Map<String, String> getOptions(String txt, Element e) {
+		Map<String, String> m = new LinkedHashMap<String, String>();
+		Pattern p = Pattern.compile(OPTION_REG_3);
+		boolean isOneOpt = isOneOpt(txt);
+		boolean match = false;
+		boolean flag = false;
+		int last = 0;
+		String atLast = "";
+		String lastStr = "";
+		String curr = "";
+		Matcher mt = p.matcher(txt);
+		while (mt.find()) {
+			int beg = mt.start();
+			int end = mt.end();
+			String group = mt.group();
+			if(StringUtils.isNotEmpty(group)) {
+				if(beg == 0) {
+					curr = group.substring(0, 1);
+					flag = true;
+				} else {
+					if(flag) {
+						lastStr = txt.substring(last,beg);
+						m.put(curr, lastStr);
+						curr = group.substring(0, 1);
+					}
+				}
+				atLast = txt.substring(end);
+				match = true;
+			}
+			last = end;
+			if(isOneOpt) {
+				break;
+			}
+		}
+		if(match) {
+			m.put(curr, atLast);
+		}
+		return m;
+	}
+	
+	private static boolean checkEnglish(String subjectName) {
+		if(StringUtils.isEmpty(subjectName)) {
+			return false;
+		}
+		if(subjectName.indexOf("英语") != -1) {
+			return true;
+		}
+		return false;
+	}
+	
+	private static boolean isOneOpt(String text) {
+		if(StringUtils.isEmpty(text)) {
+			return false;
+		}
+		String rep = text.replaceAll(OPTION_REG_3, "#");
+		int count = 0;
+		while(rep.indexOf("#") >=0) {
+			rep = rep.substring(rep.indexOf("#")+1);
+			count++;
+			if(count >= 2) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	
 }

@@ -23,6 +23,10 @@ public class SubjectAO {
 	 * 大题型id
 	 */
 	private Integer id;
+	/**
+	 * 题型归类id
+	 */
+	private String classifyId;
 	
 	public Integer getQuestionTypeId() {
 		return questionTypeId;
@@ -54,6 +58,14 @@ public class SubjectAO {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public String getClassifyId() {
+		return classifyId;
+	}
+
+	public void setClassifyId(String classifyId) {
+		this.classifyId = classifyId;
 	}
 	
 	

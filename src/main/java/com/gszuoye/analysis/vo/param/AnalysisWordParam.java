@@ -15,6 +15,10 @@ public class AnalysisWordParam {
 	 */
 	private Integer subjectId;
 	/**
+	 * 科目名
+	 */
+	private String subjectName;
+	/**
 	 * 文件上传后，生成的路径
 	 */
 	private String filePath;
@@ -48,6 +52,11 @@ public class AnalysisWordParam {
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
-	
+	public String getSubjectName() {
+		return subjectName;
+	}
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
 	
 }
