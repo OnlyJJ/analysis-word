@@ -360,6 +360,9 @@ public class DocxParseUtil {
 			if(css.indexOf(UNDERLINE) != -1) {
 				per.append(U_1);
 				suf.append(U_2);
+				if(StringUtils.isEmpty(p.text())) {
+					p.text(TAB);
+				}
 			}
 			result.append(per.toString()).append(p.text()).append(suf.toString());
 		} else {

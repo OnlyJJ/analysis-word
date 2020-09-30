@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,15 +18,11 @@ import org.apache.poi.xwpf.usermodel.XWPFPictureData;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTGraphicalObject;
-import org.openxmlformats.schemas.drawingml.x2006.picture.CTPicture;
-import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.CTInline;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDrawing;
+import org.openxmlformats.schemas.officeDocument.x2006.math.CTOMath;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTObject;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
 
 import com.gszuoye.analysis.common.constants.Constants;
-import com.gszuoye.analysis.exception.BusinessException;
 import com.microsoft.schemas.vml.CTShape;
 /**
  * 获得图片索引工具类
@@ -62,9 +60,12 @@ public class XWPFUtils {
 		if (!imgPath.exists()) { 
 			imgPath.mkdirs();
 		}
+		ImageParse imageParse = new ImageParse(basePath, basePath + "/");
         for(int i = 0;i < paragraphList.size();i++){
         	XWPFParagraph graph = paragraphList.get(i);
-        	Map<String , String> imgIdxStyle = readImageInParagraph(graph);
+        	
+        	// 段落非公式图片
+        	Map<String , String> imgIdxStyle = readImage(graph);
             for(String pictureId : imgIdxStyle.keySet()){
                 XWPFPictureData pictureData = xwpfDocument.getPictureDataByID(pictureId);
                 String imageName = pictureData.getFileName();
@@ -77,16 +78,78 @@ public class XWPFUtils {
                 	.append(" style=").append("\"").append(imgIdxStyle.get(pictureId)).append("\" />");
                 imgMap.put(pictureId, img.toString());
             }
+            
+            // 公式图片
+            parseMath(imageParse, graph);
         }
         return imgMap;
     }
+	
+	/**
+	 * 处理公式图片
+	 * @param imageParse
+	 * @param paragraph
+	 */
+	private static void parseMath(ImageParse imageParse, XWPFParagraph paragraph) {
+		// 段落无法获取到公式位置，这里是解决定位问题
+		List<Integer> typeList = new ArrayList<>();
+		XmlCursor xmlcursor = paragraph.getCTP().newCursor();
+		while (xmlcursor.hasNextToken()) {
+			XmlCursor.TokenType tokenType = xmlcursor.toNextToken();
+			if (tokenType.isStart()) {
+				if (xmlcursor.getName().getPrefix().equalsIgnoreCase("w")
+						&& xmlcursor.getName().getLocalPart().equalsIgnoreCase("r")) {
+					typeList.add(1);
+				} else if (xmlcursor.getName().getLocalPart().equalsIgnoreCase("oMath")) {
+					typeList.add(2);
+				}
+			} else if (tokenType.isEnd()) {
+				xmlcursor.push();
+				xmlcursor.toParent();
+				if (xmlcursor.getName().getLocalPart().equalsIgnoreCase("p")) {
+					break;
+				}
+				xmlcursor.pop();
+			}
+		}
+		
+		if(typeList.size() >0) {
+			// 这里解决位置问题
+			List<Object> runsOrMathList = new ArrayList<>();
+			List<XWPFRun> runs = paragraph.getRuns();
+			List<CTOMath> oMathList = paragraph.getCTP().getOMathList();
+			Queue<XWPFRun> runsQueue = new LinkedList<>(runs);
+			Queue<CTOMath> mathQueue = new LinkedList<>(oMathList);
+			for (int i = 0; i < typeList.size(); i++) {
+				Integer type = typeList.get(i);
+				if (type.equals(1) && runs.size() > 0) {
+					runsOrMathList.add(runsQueue.poll());
+				} else if (type.equals(2) && mathQueue.size() > 0) {
+					runsOrMathList.add(mathQueue.poll());
+				}
+			}
+			// 这里可能存在的问题是，如果段落开头不是run而是公式，则公式会被丢弃
+			XWPFRun lastRun = null;
+			for (Object child : runsOrMathList) {
+				if (child instanceof XWPFRun) {
+					lastRun = (XWPFRun) child;
+				} else if (child instanceof CTOMath) {
+					String url = OmmlUtils.convertOmathToPng((CTOMath) child, imageParse);
+                	if(lastRun != null && StringUtils.isNotEmpty(url)) {
+                		if(StringUtils.isNotEmpty(lastRun.text()))
+                			lastRun.setText(url);
+                	}
+				}
+			}
+		}
+	}
 	
     /**
      *  获取某一个段落中的所有图片索引
      * @param paragraph
      * @return
      */
-    public static Map<String, String> readImageInParagraph(XWPFParagraph paragraph) {
+    private static Map<String, String> readImage(XWPFParagraph paragraph) {
         //图片索引List
     	Map<String, String> imageBundleList = new HashMap<String, String>();
  
