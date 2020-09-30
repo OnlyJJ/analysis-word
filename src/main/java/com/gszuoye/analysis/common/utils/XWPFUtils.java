@@ -157,6 +157,8 @@ public class XWPFUtils {
         List<XWPFRun> runList = paragraph.getRuns();
         XWPFRun lastRun = null;
         for (XWPFRun run : runList) {
+        	// 处理第三种格式的图片
+        	boolean isPict = true;
             //XWPFRun是POI对xml元素解析后生成的自己的属性，无法通过xml解析，需要先转化成CTR
             CTR ctr = run.getCTR();
  
@@ -225,6 +227,35 @@ public class XWPFUtils {
                     }
                 }
             }
+            // 处理v:imagedata格式的图片
+            // <w:pict>形式，需要通过此种方式来处理
+			if (isPict) {
+				List<org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPicture> picts = ctr.getPictList();
+				if (picts != null && picts.size() > 0) {
+					for (org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPicture pic : picts) {
+						XmlCursor cursor = pic.newCursor();
+						cursor.selectPath("./*");
+						while (cursor.toNextSelection()) {
+							XmlObject xmlObject = cursor.getObject();
+							if (xmlObject instanceof CTShape) {
+								CTShape shape = (CTShape) xmlObject;
+								String style = shape.getStyle();
+								String pictureId = shape.getImagedataArray()[0].getId2();
+								imageBundleList.put(pictureId, style);
+								if (lastRun == null) {
+									if (StringUtils.isNotEmpty(run.text())) {
+										run.setText(IMG_IDX_1 + pictureId + IMG_IDX_2);
+									}
+								} else {
+									if (StringUtils.isNotEmpty(lastRun.text())) {
+										lastRun.setText(IMG_IDX_1 + pictureId + IMG_IDX_2);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
             lastRun = run;
         }
         return imageBundleList;
