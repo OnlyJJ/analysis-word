@@ -12,6 +12,8 @@ public class QuesTypeAO {
 	private String name;
 	private String code;
 	private Integer score;
+	private Integer realId;
+	private String realName;
 	
 	public Integer getId() {
 		return id;
@@ -49,6 +51,17 @@ public class QuesTypeAO {
 	public void setScore(Integer score) {
 		this.score = score;
 	}
-	
+	public Integer getRealId() {
+		return realId;
+	}
+	public void setRealId(Integer realId) {
+		this.realId = realId;
+	}
+	public String getRealName() {
+		return realName;
+	}
+	public void setRealName(String realName) {
+		this.realName = realName;
+	}
 	
 }

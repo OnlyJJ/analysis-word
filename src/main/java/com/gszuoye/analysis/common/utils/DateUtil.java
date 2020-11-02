@@ -34,7 +34,7 @@ public class DateUtil {
 	}
     
     public static boolean LICENSE() {
-    	if(new Date().after(parse("2020-11-10"))) {
+    	if(new Date().after(parse("2020-12-31"))) {
     		return false;
     	}
     	return true;

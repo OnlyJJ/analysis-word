@@ -19,6 +19,7 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.xmlbeans.XmlCursor;
 import org.apache.xmlbeans.XmlObject;
 import org.openxmlformats.schemas.officeDocument.x2006.math.CTOMath;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDrawing;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTObject;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
 
@@ -73,8 +74,9 @@ public class XWPFUtils {
                 byte[] bytes = pictureData.getData();
                 String absoUrl = basePath +"/" + imageName;
                 FileUtil.write(bytes, absoUrl);
+                String destUrl =  Constants.DOMAIN + absoUrl.replace(Constants.ABSOLUTELY_PATH, "/profile/");
                 StringBuilder img = new StringBuilder();
-                img.append("<img src=").append("\"").append(absoUrl).append("\"")
+                img.append("<img src=").append("\"").append(destUrl).append("\"")
                 	.append(" style=").append("\"").append(imgIdxStyle.get(pictureId)).append("\" />");
                 imgMap.put(pictureId, img.toString());
             }
@@ -171,7 +173,8 @@ public class XWPFUtils {
                 //如果子元素是<w:drawing>这样的形式，使用CTDrawing保存图片
                 // 注意：
              // 这种模式的图片，poi在解析文档时，可以自动获取，所以可以不用处理
-//                if (o instanceof CTDrawing) { 
+                if (o instanceof CTDrawing) { 
+                	isPict = false;
 //                    CTDrawing drawing = (CTDrawing) o;
 //                    CTInline[] ctInlines = drawing.getInlineArray();
 //                    for (CTInline ctInline : ctInlines) {
@@ -200,10 +203,11 @@ public class XWPFUtils {
 //                            }
 //                        }
 //                    }
-//                }
+                }
                 //使用CTObject保存图片
                 //<w:object>形式
                 if (o instanceof CTObject) {
+                	isPict = false;
                     CTObject object = (CTObject) o;
                     XmlCursor w = object.newCursor();
                     w.selectPath("./*");

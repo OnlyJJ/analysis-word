@@ -60,6 +60,7 @@ public class Constants {
 	/**
 	 * 题型获取接口
 	 */
-	public static final String SUBJECT_TYPE_URL = "https://test.gszuoye.com/paperupload/list/questype.do";
-//	public static final String SUBJECT_TYPE_URL = "http://localhost:8088/paperupload/list/questype.do"; // 正式
+//	public static final String SUBJECT_TYPE_URL = "https://test.gszuoye.com/paperupload/list/questype.do";
+	public static final String SUBJECT_TYPE_URL = "https://test.gszuoye.com/paperupload/list/questype/withcustom.do";
+//	public static final String SUBJECT_TYPE_URL = "http://localhost:8088/paperupload/list/questype/withcustom.do"; // 正式
 }

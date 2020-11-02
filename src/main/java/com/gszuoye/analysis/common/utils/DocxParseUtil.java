@@ -171,12 +171,12 @@ public class DocxParseUtil {
 								itemId = StringUtil.generaterId();
 								subjectNum += 1;
 								if(ques != null) {
-									subjectMap.put(ques.getName(), subjectNum);
+									subjectMap.put(ques.getRealName(), subjectNum);
 									questionTypeIdMap.put(ques.getName(), ques.getQuestionTypeId());
 									questionNameIdMap.put(ques.getName(), ques.getId());
 									// 题目数量归类
 									if(sub != null) {
-										sub.setSubjectTitle(ques.getName());
+										sub.setSubjectTitle(ques.getRealName());
 										sub.setCount(subjectNum);
 										sub.setQuestionTypeId(questionTypeIdMap.get(ques.getName()));
 										sub.setId(questionNameIdMap.get(ques.getName()));
