@@ -6,7 +6,7 @@ spring:
   # 上传文件大小设置
   servlet: 
       multipart: 
-        max-file-size: 100MB
+        max-file-size: 10MB
         max-request-size: 100MB
   # 日志
 logging:
@@ -20,7 +20,7 @@ server:
       context-path: /
     port: 9999
     tomcat:
-      # tomcat的URI编码
+      basedir: .      # tomcat的URI编码
       uri-encoding: UTF-8
       # tomcat最大线程数，默认为200
       max-threads: 800

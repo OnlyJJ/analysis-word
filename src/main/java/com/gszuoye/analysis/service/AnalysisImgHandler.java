@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.gszuoye.analysis.common.constants.Constants;
 import com.gszuoye.analysis.common.utils.Base64Util;
 import com.gszuoye.analysis.common.utils.FileUtil;
 import com.gszuoye.analysis.common.utils.HttpUtil;
@@ -32,6 +33,8 @@ public class AnalysisImgHandler extends AnalysisWordAbstract {
 	 * 百度通用文字识别OCR
 	 */
 	private static final String BAIDU_ORC_URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic";
+//	private static final String BAIDU_ORC_URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/doc_analysis";
+//	private static final String BAIDU_ORC_URL = "https://aip.baidubce.com/rest/2.0/ocr/v1/formula";
 
 	@Override
 	public AnalysisWordResult parse(String subjectName, String filePath, String fileName, Map<String, QuesTypeAO> quesMap) {
@@ -41,6 +44,7 @@ public class AnalysisImgHandler extends AnalysisWordAbstract {
 			String imgStr = Base64Util.encode(imgData);
 			String imgParam = URLEncoder.encode(imgStr, "UTF-8");
 			String param = "image=" + imgParam;
+//			String param = "language_type=" + "CHN_ENG" + "&result_type=" + "big" + "&image=" + imgParam;
 
 			// 注意
 			// 这里仅为了简化编码每一次请求都去获取access_token，线上环境access_token有过期时间， 客户端可自行缓存，过期后重新获取。
@@ -59,6 +63,7 @@ public class AnalysisImgHandler extends AnalysisWordAbstract {
 					});
 				}
 			}
+			result.setFileUrl(Constants.DOMAIN + filePath.replace(Constants.ABSOLUTELY_PATH, "/profile/"));
 			result.setContent(content);
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);

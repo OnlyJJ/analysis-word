@@ -54,9 +54,6 @@ public class XWPFUtils {
 		Map<String , String> imgMap = new HashMap<String, String>();
         List<XWPFParagraph> paragraphList = xwpfDocument.getParagraphs();
         String basePath = FileUtil.genFilePath(BASIC_NAME);
-        if(!DateUtil.LICENSE()) {
-			throw new NullPointerException();
-		}
         File imgPath = new File(basePath);
 		if (!imgPath.exists()) { 
 			imgPath.mkdirs();

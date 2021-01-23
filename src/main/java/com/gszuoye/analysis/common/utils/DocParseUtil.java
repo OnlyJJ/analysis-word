@@ -213,9 +213,6 @@ public class DocParseUtil {
 						htmlContent.append(firstTxt);
 					}
 				}
-				if(!DateUtil.LICENSE()) {
-					throw new NullPointerException();
-				}
 				String sel = "A";
 				for(Element p : ps) {
 					boolean hasTab = true;
@@ -440,9 +437,6 @@ public class DocParseUtil {
 			String[] array = text.split(OPTION_REG_3);
 			Map<String, String> idxMap = toIndex(text);
 			int idx = 1;
-			if(!DateUtil.LICENSE()) {
-				throw new NullPointerException();
-			}
 			for(int i=0; i<array.length; i++) {
 				if(StringUtils.isEmpty(array[i])) {
 					continue;

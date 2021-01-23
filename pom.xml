@@ -199,6 +199,13 @@
 			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/jai_codec.jar</systemPath>
 		</dependency>
 		<!-- end -->
+		<dependency>
+			<groupId>com.sun.media</groupId>
+  			<artifactId>jai_sio</artifactId>
+ 			<version>1.0.2</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/jai_sio-1.0.2.jar</systemPath>
+		</dependency>
 		<!-- emf 转svg -->
 		<dependency>
 			<groupId>org.freehep</groupId>

@@ -26,6 +26,7 @@ import com.gszuoye.analysis.common.constants.Constants;
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageEncoder;
 import com.sun.media.jai.codec.JPEGEncodeParam;
+import com.sun.media.jed.fpx.KernelerJAI;
 
 import net.arnx.wmf2svg.gdi.svg.SvgGdi;
 import net.arnx.wmf2svg.gdi.wmf.WmfParser;
@@ -35,6 +36,12 @@ import net.arnx.wmf2svg.gdi.wmf.WmfParser;
  *
  */
 public class ImgHellper {
+	
+	private static final int width = 680;
+	private static final int height = 720;
+	private static final int xOrigin = 102;
+	private static final int yOrigin = 102;
+	
 	/**
 	 * wmf转svg
 	 * @param src
@@ -145,6 +152,24 @@ public class ImgHellper {
 		}
 		return saveUrl;
 	} 
+	
+	public static void calculate(String file) {
+		InputStream is = null;
+		try {
+			is = new FileInputStream(file);
+			new KernelerJAI(width, height, xOrigin, yOrigin, true).calculate(is);
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			if(is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+				}
+			}
+		}
+	}
 
 	private static void output(Document doc, OutputStream out) throws Exception {
 		TransformerFactory factory = TransformerFactory.newInstance();

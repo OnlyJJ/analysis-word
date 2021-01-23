@@ -15,6 +15,10 @@ public class FileUploadResult implements Serializable {
 	 * 文件名
 	 */
 	private String fileName;
+	/**
+	 * 访问路径
+	 */
+	private String profileUrl;
 	
 	public String getFilePath() {
 		return filePath;
@@ -27,6 +31,12 @@ public class FileUploadResult implements Serializable {
 	}
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+	public String getProfileUrl() {
+		return profileUrl;
+	}
+	public void setProfileUrl(String profileUrl) {
+		this.profileUrl = profileUrl;
 	}
 	
 	

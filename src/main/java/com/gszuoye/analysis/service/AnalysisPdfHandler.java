@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.gszuoye.analysis.common.constants.Constants;
 import com.gszuoye.analysis.common.utils.PDFParseUtil;
 import com.gszuoye.analysis.exception.BusinessException;
 import com.gszuoye.analysis.vo.QuesTypeAO;
@@ -40,6 +41,7 @@ public class AnalysisPdfHandler extends AnalysisWordAbstract {
 			PDFDomTree tree = new PDFDomTree();
 			tree.writeText(pdf, output);
 			result = PDFParseUtil.parse(baos.toString());
+			result.setFileUrl(Constants.DOMAIN + filePath.replace(Constants.ABSOLUTELY_PATH, "/profile/"));
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new BusinessException("解析异常");

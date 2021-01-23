@@ -31,6 +31,7 @@ import com.gszuoye.analysis.common.constants.Constants;
 import com.gszuoye.analysis.common.utils.AnalysisUtil;
 import com.gszuoye.analysis.common.utils.DateUtil;
 import com.gszuoye.analysis.common.utils.FileUtil;
+import com.gszuoye.analysis.common.utils.ImgHellper;
 import com.gszuoye.analysis.exception.BusinessException;
 import com.gszuoye.analysis.vo.QuesTypeAO;
 import com.gszuoye.analysis.vo.result.AnalysisWordResult;
@@ -51,9 +52,6 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 //			List<String> imgList = new ArrayList<String>();
 			final String imagepath = FileUtil.genFilePath(fileName);
 			input = new FileInputStream(new File(filePath));
-			if(!DateUtil.LICENSE()) {
-				throw new NullPointerException();
-			}
 			HWPFDocument wordDocument = new HWPFDocument(input);
 			WordToHtmlConverter wordToHtmlConverter = new WordToHtmlConverter(DocumentBuilderFactory
 					.newInstance()
@@ -67,6 +65,7 @@ public class AnalysisDocHandler extends AnalysisWordAbstract {
 					if (!imgPath.exists()) { 
 						imgPath.mkdirs();
 					}
+					ImgHellper.calculate(filePath);
 					// 把原始图片输出到临时目录
 					String tempPath = imagepath + "/" + suggestedName;
 					File file = new File(tempPath);

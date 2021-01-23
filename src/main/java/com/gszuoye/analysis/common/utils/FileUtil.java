@@ -107,9 +107,6 @@ public class FileUtil {
 	 * 
 	 */
 	public static final String upload(String baseDir, MultipartFile file) throws Exception {
-		if(!DateUtil.LICENSE()) {
-			throw new NullPointerException();
-		}
 		int fileNamelength = file.getOriginalFilename().length();
 		if (fileNamelength > DEFAULT_FILE_NAME_LENGTH) {
 			throw new BusinessException("文件最大不能超过" + DEFAULT_FILE_NAME_LENGTH);

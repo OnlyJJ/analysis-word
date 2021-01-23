@@ -42,6 +42,7 @@ public class AnalysisWordController {
 			String name = file.getOriginalFilename();
 			res.setFileName(name);
 			res.setFilePath(filePath);
+			res.setProfileUrl(Constants.DOMAIN + filePath.replace(Constants.ABSOLUTELY_PATH, "/profile/"));
 		} catch(BusinessException e) {
 			LOG.error(e.getMessage(), e);
 			return BaseResult.error(e.getMessage());

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.gszuoye.analysis.common.utils.AnalysisUtil;
+import com.gszuoye.analysis.common.utils.ImgHellper;
 import com.gszuoye.analysis.common.utils.XWPFUtils;
 import com.gszuoye.analysis.exception.BusinessException;
 import com.gszuoye.analysis.vo.QuesTypeAO;
@@ -36,6 +37,7 @@ public class AnalysisDocxHandler extends AnalysisWordAbstract {
 			XWPFDocument docxDocument = new XWPFDocument(in);
 			// 处理图片
 			Map<String , String> imgMap = XWPFUtils.readImageInParagraph(docxDocument);
+//			ImgHellper.calculate(filePath);
 			XHTMLOptions options = XHTMLOptions.create();
 			options.setImageManager(new Base64EmbedImgManager());
 			baos = new ByteArrayOutputStream();

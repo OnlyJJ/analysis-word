@@ -32,11 +32,4 @@ public class DateUtil {
 		}
 		return null;
 	}
-    
-    public static boolean LICENSE() {
-    	if(new Date().after(parse("2020-12-31"))) {
-    		return false;
-    	}
-    	return true;
-    }
 }
